@@ -4,6 +4,10 @@ Transparência da Câmara dos Deputados (e TSE) **legível para qualquer pessoa*
 gastando, com o quê e com quem; quem votou o quê; presença, salário e dados de eleições,
 com resumos em linguagem simples gerados por IA.
 
+**🌐 No ar: [real-transparencia-production.up.railway.app](https://real-transparencia-production.up.railway.app)** — todo deploy em produção fica disponível nesse endereço.
+
+[![Raio-X da Câmara](docs/screenshot-relatorio.png)](https://real-transparencia-production.up.railway.app/relatorio)
+
 Dados oficiais: API e arquivos abertos da [Câmara](https://dadosabertos.camara.leg.br) e do
 [TSE](https://dadosabertos.tse.jus.br). Sem raspagem de HTML.
 
