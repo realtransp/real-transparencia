@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_card.css">
+<style>
+  .lk { display: flex; align-items: center; gap: 14px; }
+  .mark {
+    width: 52px; height: 52px; border-radius: var(--radius-md);
+    background: var(--green-800);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-serif); font-weight: 600; font-size: 24px;
+    color: var(--paper-0); letter-spacing: -0.03em; flex: none;
+    box-shadow: var(--shadow-sm);
+  }
+  .mark .cifrao { color: var(--amber-400); }
+  .wm {
+    font-family: var(--font-serif); font-weight: 600; font-size: 32px;
+    letter-spacing: -0.02em; color: var(--green-800); line-height: 1;
+  }
+  .wm .cifrao { color: var(--clay-600); }
+  .wm .reais { color: var(--amber-600); font-weight: 700; }
+  .tag {
+    font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--fg-3); margin-top: 5px;
+  }
+</style>
+</head>
+<body>
+  <div class="card-grid">
+    <!-- Primary lockup -->
+    <div class="lk">
+      <div class="mark">R<span class="cifrao">$</span></div>
+      <div>
+        <div class="wm"><span class="reais">R$</span> Transparência</div>
+        <div class="tag">Onde o seu dinheiro vira voto</div>
+      </div>
+    </div>
+    <!-- Inline wordmark + size variants -->
+    <div class="row" style="gap:28px; border-top:1px solid var(--border); padding-top:16px;">
+      <div class="wm" style="font-size:24px;"><span class="reais">R$</span> Transparência</div>
+      <div class="wm" style="font-size:17px;"><span class="reais">R$</span> Transparência</div>
+      <div class="mark" style="width:34px;height:34px;font-size:16px;border-radius:var(--radius-sm);">R<span class="cifrao">$</span></div>
+    </div>
+  </div>
+</body>
+</html>

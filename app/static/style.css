@@ -1,0 +1,81 @@
+:root{
+  --bg:#0f1419; --panel:#171f2a; --panel2:#1e2937; --ink:#e8edf2; --muted:#8a98a8;
+  --accent:#2dd4a7; --accent2:#3b82f6; --line:#26303d; --bad:#ef5350; --good:#26a69a;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.55}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.container{max-width:1040px;margin:0 auto;padding:24px 18px 60px}
+.muted{color:var(--muted)}
+code{background:#0008;padding:1px 5px;border-radius:4px;font-size:.85em}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:14px 22px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+.brand{font-weight:800;font-size:1.15rem;color:var(--ink)}
+.topbar nav{display:flex;gap:18px;flex-wrap:wrap}
+.topbar nav a{color:var(--muted);font-weight:600}
+.topbar nav a:hover{color:var(--ink);text-decoration:none}
+
+.hero h1{font-size:2rem;margin:.2em 0}
+.lead{color:var(--muted);font-size:1.1rem;max-width:60ch}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:22px 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+.stat{display:flex;flex-direction:column;gap:4px}
+.stat .big{font-size:1.7rem;font-weight:800;color:var(--accent)}
+.stat .label{color:var(--muted);font-size:.85rem}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:18px 0}
+@media(max-width:760px){.grid-2{grid-template-columns:1fr}}
+section h2{font-size:1.2rem;border-bottom:1px solid var(--line);padding-bottom:6px}
+
+.ranklist,.votlist{list-style:none;padding:0;margin:0}
+.ranklist li,.votlist li{display:flex;justify-content:space-between;gap:10px;align-items:baseline;
+  padding:9px 0;border-bottom:1px solid var(--line)}
+.ranklist li span:first-child{flex:1;min-width:0}
+.votlist li a{flex:1}
+
+.btn{display:inline-block;background:var(--accent2);color:#fff;padding:8px 14px;border-radius:9px;
+  border:0;font-weight:600;cursor:pointer;margin-top:10px}
+.btn:hover{filter:brightness(1.1);text-decoration:none}
+
+.tabela{width:100%;border-collapse:collapse;margin:10px 0;font-size:.95rem}
+.tabela th,.tabela td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
+.tabela thead th{color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.04em}
+.tabela .r{text-align:right}
+.tabela tbody tr:hover{background:var(--panel)}
+
+.filtros{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+.filtros input,.filtros select,.filtros button{padding:8px 12px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink)}
+.filtros button{background:var(--accent2);border:0;font-weight:600;cursor:pointer}
+
+.dep-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:18px}
+.dep-card{display:flex;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--line);
+  border-radius:12px;padding:10px}
+.dep-card:hover{border-color:var(--accent);text-decoration:none}
+.dep-card img{width:48px;height:48px;border-radius:50%;object-fit:cover}
+.dep-card div{display:flex;flex-direction:column}
+.dep-card strong{color:var(--ink)}
+
+.perfil{display:flex;gap:18px;align-items:center;margin-bottom:8px}
+.perfil .foto{width:96px;height:96px;border-radius:14px;object-fit:cover}
+
+.resumo-ia{margin:18px 0}
+.resumo-ia .fonte{color:var(--muted);font-size:.82rem;margin-top:8px}
+.resumo-ia .aviso{color:var(--muted)}
+.htmx-indicator{opacity:0;margin-left:8px;color:var(--muted)}
+.htmx-request .htmx-indicator{opacity:1}
+
+.badge{font-size:.78rem;padding:2px 8px;border-radius:20px;font-weight:700}
+.badge.ok{background:#0c3b30;color:var(--accent)}
+.badge.no{background:#3b1414;color:var(--bad)}
+
+.voto{font-weight:700}
+.voto-sim{color:var(--good)} .voto-não,.voto-nao{color:var(--bad)}
+.voto-abstenção,.voto-abstencao,.voto-obstrução,.voto-obstrucao{color:#d4a72d}
+
+.footer{border-top:1px solid var(--line);color:var(--muted);padding:24px 18px;text-align:center;font-size:.9rem}
+.footer a{color:var(--muted);text-decoration:underline}

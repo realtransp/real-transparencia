@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_card.css">
+<style>
+  .lead { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); margin-bottom: 12px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-sans); font-size: 14px; font-weight: 600;
+    padding: 10px 16px; border-radius: var(--radius-md); border: 1px solid transparent;
+    cursor: pointer; transition: background .15s, border-color .15s; line-height: 1;
+  }
+  .btn svg { width: 16px; height: 16px; }
+  .btn-primary { background: var(--brand); color: var(--paper-0); }
+  .btn-primary:hover { background: var(--brand-hover); }
+  .btn-action { background: var(--action); color: #fff; }
+  .btn-action:hover { background: var(--action-hover); }
+  .btn-secondary { background: var(--paper-1); color: var(--green-800); border-color: var(--border-strong); }
+  .btn-secondary:hover { background: var(--paper-2); }
+  .btn-ghost { background: transparent; color: var(--green-700); }
+  .btn-ghost:hover { background: var(--green-50); }
+  .btn-sm { padding: 7px 12px; font-size: 13px; }
+  .grp { font-family: var(--font-mono); font-size: 10px; color: var(--fg-3); margin: 14px 0 7px; }
+</style>
+</head>
+<body>
+  <div class="lead">Botões</div>
+  <div class="row-wrap">
+    <button class="btn btn-primary"><i data-lucide="bar-chart-3"></i>Ver atividade</button>
+    <button class="btn btn-action"><i data-lucide="megaphone"></i>Cobrar deputado</button>
+    <button class="btn btn-secondary"><i data-lucide="download"></i>Baixar dados</button>
+    <button class="btn btn-ghost"><i data-lucide="share-2"></i>Compartilhar</button>
+  </div>
+  <div class="grp">PEQUENO · ÍCONE</div>
+  <div class="row-wrap">
+    <button class="btn btn-primary btn-sm"><i data-lucide="search"></i>Buscar</button>
+    <button class="btn btn-action btn-sm"><i data-lucide="message-circle"></i>WhatsApp</button>
+    <button class="btn btn-secondary btn-sm"><i data-lucide="filter"></i>Filtrar</button>
+  </div>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

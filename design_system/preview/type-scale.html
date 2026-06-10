@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_card.css">
+<style>
+  .lead { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); margin-bottom: 10px; }
+  .scale-row { display: flex; align-items: baseline; gap: 14px; padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .scale-row:last-child { border-bottom: 0; }
+  .scale-row .spec { font-family: var(--font-mono); font-size: 10px; color: var(--fg-3); width: 120px; flex: none; }
+  .scale-row .samp { color: var(--fg-1); }
+</style>
+</head>
+<body>
+  <div class="lead">Escala tipográfica</div>
+  <div class="scale-row"><span class="spec">serif 52/600</span><span class="samp" style="font-family:var(--font-serif);font-size:30px;font-weight:600;letter-spacing:-0.02em">Display</span></div>
+  <div class="scale-row"><span class="spec">serif 32/600 · h1</span><span class="samp" style="font-family:var(--font-serif);font-size:24px;font-weight:600;letter-spacing:-0.015em">Manchete de página</span></div>
+  <div class="scale-row"><span class="spec">serif 25/600 · h2</span><span class="samp" style="font-family:var(--font-serif);font-size:20px;font-weight:600">Título de seção</span></div>
+  <div class="scale-row"><span class="spec">sans 20/600 · h3</span><span class="samp" style="font-family:var(--font-sans);font-size:17px;font-weight:600">Subtítulo de UI</span></div>
+  <div class="scale-row"><span class="spec">sans 16/400 · body</span><span class="samp" style="font-family:var(--font-sans);font-size:15px">Texto de corpo padrão</span></div>
+  <div class="scale-row"><span class="spec">sans 14/400 · small</span><span class="samp" style="font-family:var(--font-sans);font-size:13px;color:var(--fg-2)">Texto auxiliar e legendas</span></div>
+  <div class="scale-row"><span class="spec">mono 12.5 · label</span><span class="samp" style="font-family:var(--font-mono);font-size:11.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--fg-3)">Rótulo / eyebrow</span></div>
+</body>
+</html>

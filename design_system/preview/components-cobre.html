@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_card.css">
+<style>
+  .lead { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); margin-bottom: 12px; }
+  .cta { background: var(--green-800); border-radius: var(--radius-lg); padding: 18px 20px; color: var(--ink-on-dark);
+         background-image: radial-gradient(circle at 1px 1px, rgba(242,236,220,0.06) 1px, transparent 0); background-size: 13px 13px; }
+  .cta h4 { font-family: var(--font-serif); font-weight: 600; font-size: 19px; color: #fff; margin-bottom: 4px; }
+  .cta p { font-family: var(--font-sans); font-size: 13.5px; color: var(--green-200); margin-bottom: 14px; max-width: 52ch; }
+  .acts { display: flex; gap: 10px; }
+  .b { display:inline-flex; align-items:center; gap:8px; font-family: var(--font-sans); font-size: 14px; font-weight: 700; padding: 11px 16px; border-radius: var(--radius-md); cursor:pointer; }
+  .b svg { width: 16px; height: 16px; }
+  .wa { background: #25D366; color: #07301a; }
+  .em { background: var(--amber-500); color: var(--green-950); }
+</style>
+</head>
+<body>
+  <div class="lead">Bloco "Cobre seu deputado"</div>
+  <div class="cta">
+    <h4>Não gostou? Cobre.</h4>
+    <p>Monte uma mensagem em 30 segundos e envie direto para o gabinete — por e-mail ou WhatsApp.</p>
+    <div class="acts">
+      <span class="b wa"><i data-lucide="message-circle"></i>Mandar no WhatsApp</span>
+      <span class="b em"><i data-lucide="mail"></i>Enviar e-mail</span>
+    </div>
+  </div>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

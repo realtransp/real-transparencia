@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% from "_components.html" import metric_strip %}
+{% block title %}{{ d.nome }} · Fornecedor · R$ Transparência{% endblock %}
+{% block content %}
+<div class="wrap wrap-wide page-head">
+  <a class="eyebrow" style="cursor:pointer;color:var(--green-700)" href="/gastos{{ ('?ano=' ~ ano) if ano }}">← Gastos da Câmara</a>
+  <h1 class="h1" style="margin-top:8px">{{ d.nome }}</h1>
+  <p class="lead" style="margin-top:8px;font-size:15px">
+    {% if d.doc %}{{ 'CPF (pessoa física)' if d.doc|length == 11 else 'CNPJ ' ~ d.doc }} · {% endif %}
+    Recebimentos da cota parlamentar (CEAP){% if ano %} em {{ ano }}{% else %} (todos os anos){% endif %}.
+  </p>
+</div>
+
+<div class="wrap wrap-wide">
+  {{ metric_strip([
+      (d.total | brl, 'total recebido', 'var(--clay-600)'),
+      (d.qtd | num, 'notas fiscais'),
+      (d.n_dep | num, 'deputados pagaram'),
+      ((d.total / d.qtd) | brl if d.qtd else '—', 'valor médio/nota'),
+  ]) }}
+</div>
+
+<div class="wrap wrap-wide gastos-grid">
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:4px">Quem pagou</h3>
+    <p class="muted" style="font-size:12px;margin-bottom:12px">Clique num deputado para ver <strong>só as notas dele</strong> abaixo.</p>
+    <div class="qp-scroll">
+    <table class="rank-table">
+      <thead><tr><th class="rk">#</th><th>Deputado</th><th class="num">Notas</th><th class="num">Total</th></tr></thead>
+      <tbody>{% for r in d.por_dep %}
+        <tr class="qp-row {{ 'on' if d.dep and r.id == d.dep }}">
+          <td class="rk">{{ loop.index }}</td>
+          <td><a href="/fornecedor?nome={{ d.nome|urlencode }}{{ ('&ano=' ~ ano) if ano }}&dep={{ r.id }}#notas">{{ r.nome }}</a> <span class="muted" style="font-size:11px">{{ r.sigla_partido }}-{{ r.sigla_uf }}</span></td>
+          <td class="num">{{ r.qtd | num }}</td>
+          <td class="num">{{ r.total | brl }}</td>
+        </tr>
+      {% endfor %}</tbody>
+    </table>
+    </div>
+  </div>
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:10px">Em quê (categorias)</h3>
+    {% set maxc = d.por_cat[0].total if d.por_cat else 1 %}
+    {% for c in d.por_cat %}
+    <div class="cat-row">
+      <div class="cat-label"><span class="sq" style="background:var(--viz-{{ (loop.index0 % 6)+1 }})"></span>{{ c.categoria }}</div>
+      <div class="data" style="font-size:13.5px">{{ c.total | brl }}</div>
+      <div class="cat-track"><div class="fill" style="width:{{ ((c.total/maxc)*100)|round|int }}%;background:var(--viz-{{ (loop.index0 % 6)+1 }})"></div></div>
+    </div>
+    {% else %}<p class="muted">—</p>{% endfor %}
+  </div>
+</div>
+
+<div class="wrap wrap-wide" style="padding-bottom:48px" id="notas">
+  <h2 class="h2" style="margin:8px 0 4px">Notas fiscais</h2>
+  {% if d.dep_sel %}
+  <div class="nota-filtro">
+    <span><i data-lucide="filter"></i> Mostrando só as notas de <strong>{{ d.dep_sel.nome }}</strong> ({{ d.dep_sel.sigla_partido }}-{{ d.dep_sel.sigla_uf }}): {{ d.dep_sel.qtd | num }} notas, {{ d.dep_sel.total | brl }}</span>
+    <a class="btn btn-ghost btn-sm" href="/fornecedor?nome={{ d.nome|urlencode }}{{ ('&ano=' ~ ano) if ano }}#notas">✕ ver todas</a>
+  </div>
+  {% else %}
+  <p class="muted" style="font-size:13px;margin-bottom:12px">Maiores notas pagas a este fornecedor{% if ano %} em {{ ano }}{% endif %}, com link para o comprovante. Clique num deputado acima para filtrar.</p>
+  {% endif %}
+  <div class="card" style="overflow:hidden">
+    <div class="table-scroll">
+    <table class="rec-table">
+      <thead><tr><th>Data</th><th>Deputado</th><th>Categoria</th><th style="text-align:right">Valor</th></tr></thead>
+      <tbody>
+        {% for n in d.notas %}
+        <tr>
+          <td class="data" style="font-size:12.5px;color:var(--fg-2);white-space:nowrap">{{ n.data_documento or '—' }}</td>
+          <td style="white-space:nowrap"><a href="/deputados/{{ n.deputado_id }}">{{ n.deputado }}</a> <span class="muted" style="font-size:11px">{{ n.sigla_partido }}-{{ n.sigla_uf }}</span></td>
+          <td><span class="tag">{{ n.tipo_despesa }}</span></td>
+          <td class="num" style="white-space:nowrap">{{ n.valor_liquido | brlf }}{% if n.url_documento %} <a href="{{ n.url_documento }}" target="_blank" rel="noopener" title="Abrir nota"><i data-lucide="file-text" style="width:14px;height:14px;vertical-align:-2px"></i></a>{% endif %}</td>
+        </tr>
+        {% else %}<tr><td colspan="4" class="muted">Sem notas no período.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

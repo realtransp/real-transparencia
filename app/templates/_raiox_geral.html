@@ -1,0 +1,142 @@
+{# Narrativa GERAL: panorama da Câmara + ranking entre partidos + navegação. #}
+{% from "_components.html" import metric_strip %}
+{% from "_raiox_macros.html" import teto_gauge, serie_mini, leitura, lede %}
+{% from "_components.html" import ad_unit %}
+{% set mn = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'] %}
+
+<div class="wrap wrap-wide">
+  {{ metric_strip([
+      (d.gasto | brl, 'gasto em ' ~ ano, 'var(--clay-600)'),
+      ((d.presenca.pct ~ '%') if d.presenca else '—', 'presença plenário', 'var(--green-700)'),
+      ((d.participacao.pct ~ '%') if d.participacao else '—', 'participação em votos'),
+      ((d.producao.projetos | num) if d.producao else '—', 'projetos de lei'),
+      (d.n_deputados | num, 'deputados'),
+  ]) }}
+
+  {{ lede(d.narrativa) }}
+
+  <div class="card card-pad rx-compare">
+    <div>
+      <span class="eyebrow">Comparação com {{ d.prev }}{% if d.parcial %} · mesmo período (até {{ mn[d.ate_mes-1] }}){% endif %}</span>
+      {% if d.parcial %}
+      <p style="margin-top:6px">Até {{ mn[d.ate_mes-1] }} de {{ ano }}, a Câmara gastou <strong class="data">{{ d.gasto_periodo | brl }}</strong>{% if d.gasto_prev_periodo %}, no mesmo trecho de {{ d.prev }} foi <strong class="data">{{ d.gasto_prev_periodo | brl }}</strong>{% endif %}.</p>
+      {% else %}
+      <p style="margin-top:6px">Em {{ ano }} a Câmara gastou <strong class="data">{{ d.gasto | brl }}</strong>{% if d.gasto_prev %}, em {{ d.prev }} foi <strong class="data">{{ d.gasto_prev | brl }}</strong>{% endif %}.</p>
+      {% endif %}
+    </div>
+    {% set dd = d.delta_periodo if d.parcial else d.delta_gasto %}
+    {% if dd is not none %}
+    <div class="rx-delta {{ 'up' if dd > 0 else 'down' }}">
+      <i data-lucide="{{ 'trending-up' if dd > 0 else 'trending-down' }}"></i>{{ '+' if dd > 0 else '' }}{{ dd }}% <span>vs {{ d.prev }}</span>
+    </div>{% endif %}
+  </div>
+</div>
+
+<div class="wrap wrap-wide gastos-grid">
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:12px">Cota da Câmara: uso vs. teto</h3>
+    {{ teto_gauge(d.teto, ano, d.parcial) }}
+    {{ leitura(d.leitura, 'teto') }}
+    {{ leitura(d.leitura, 'participacao') }}
+  </div>
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:10px">A Câmara ano a ano</h3>
+    {{ serie_mini(d.serie, 'gasto', 'Gasto total por ano (R$ milhões)') }}
+    {{ serie_mini(d.serie, 'presenca', 'Presença média (% ao ano)') }}
+    {{ leitura(d.leitura, 'serie') }}
+  </div>
+</div>
+
+<!-- RANKING ENTRE PARTIDOS -->
+{% if d.ranking_partidos %}
+<div class="wrap wrap-wide"><span class="rx-step"><b>★</b>Ranking entre partidos</span></div>
+<div class="wrap wrap-wide">
+  <div class="card card-pad">
+    <div class="table-scroll">
+    <table class="rank-table rk-help">
+      <thead><tr>
+        <th>Partido</th>
+        <th class="num" title="Deputados da bancada com gasto registrado em {{ ano }}">Deps</th>
+        <th class="num" title="Quão unida a bancada vota: % médio de deputados que acompanham o voto majoritário do próprio partido em cada votação nominal">Coesão</th>
+        <th class="num" title="% das votações em que a bancada seguiu a orientação 'Governo' (entre as votações orientadas)">Com gov.</th>
+        <th class="num" title="Projetos de lei (PL/PEC/PLP…) apresentados pela bancada em todo o mandato, desde {{ d.anos_mandato[0] }}">Projetos*</th>
+        <th class="num" title="Quantos desses projetos do mandato já viraram norma jurídica (lei)">Viraram lei</th>
+        <th class="num" title="Quantos foram arquivados ou retirados">Arquiv.</th>
+        <th class="num" title="Cota (CEAP) usada em {{ ano }} dividida pelo nº de deputados da bancada">Cota/dep</th>
+      </tr></thead>
+      <tbody>{% for p in d.ranking_partidos %}
+        <tr>
+          <td><a href="/relatorio?escopo=partido&alvo={{ p.partido|urlencode }}&ano={{ ano }}">{{ p.partido }}</a></td>
+          <td class="num">{{ p.n_dep }}</td>
+          <td class="num">{{ p.coesao if p.coesao is not none else '—' }}{% if p.coesao is not none %}%{% endif %}</td>
+          <td class="num">{{ p.governo if p.governo is not none else '—' }}{% if p.governo is not none %}%{% endif %}</td>
+          <td class="num"><a href="/partido/{{ p.partido|urlencode }}/projetos?desfecho=todos&ano={{ ano }}">{{ p.apresentados | num }}</a></td>
+          <td class="num"><a href="/partido/{{ p.partido|urlencode }}/projetos?desfecho=lei&ano={{ ano }}">{{ p.lei | num }}</a></td>
+          <td class="num"><a href="/partido/{{ p.partido|urlencode }}/projetos?desfecho=arquivado&ano={{ ano }}">{{ p.arquivado | num }}</a></td>
+          <td class="num">{{ p.media_gasto | brl }}</td>
+        </tr>
+      {% endfor %}</tbody>
+    </table>
+    </div>
+    <p class="muted" style="font-size:11.5px;margin-top:12px;line-height:1.5">
+      <strong>Como ler:</strong> bancadas com 5+ deputados, ordenadas por <b>coesão</b>.
+      <b>Projetos*</b> = projetos de lei apresentados em <b>todo o mandato (desde {{ d.anos_mandato[0] }})</b>; <b>viraram lei</b> e <b>arquivados</b> são o desfecho atual deles. Como há <b>defasagem</b> entre apresentar e o desfecho (leva meses/anos), a maioria ainda está em tramitação.
+      <b>Coesão</b>, <b>com gov.</b> e <b>cota/dep</b> referem-se a {{ ano }}.
+    </p>
+  </div>
+</div>
+{% endif %}
+
+<div class="wrap wrap-wide">{{ ad_unit(adsense_slot_artigo) }}</div>
+
+{% include "_raiox_gastos.html" %}
+
+<div class="wrap wrap-wide" style="margin-top:8px">
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:10px">Gasto por partido <span class="muted" style="font-size:12px;font-weight:400">· clique p/ raio-x</span></h3>
+    <table class="rank-table">
+      <thead><tr><th>Partido</th><th class="num">Deps</th><th class="num">Total {{ ano }}</th><th class="num">Média/dep</th></tr></thead>
+      <tbody>{% for p in partidos_gasto[:16] %}<tr>
+        <td><a href="/relatorio?escopo=partido&alvo={{ p.partido|urlencode }}&ano={{ ano }}">{{ p.partido }}</a></td>
+        <td class="num">{{ p.deputados }}</td>
+        <td class="num">{{ p.total | brl }}</td>
+        <td class="num">{{ (p.total / p.deputados) | brl if p.deputados else '—' }}</td>
+      </tr>{% endfor %}</tbody>
+    </table>
+  </div>
+</div>
+
+<div class="wrap wrap-wide">
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:4px">Quem mais gasta <span class="muted" style="font-size:12px;font-weight:400">· clique p/ raio-x</span></h3>
+    <p class="muted" style="font-size:12px;margin-bottom:8px">Maiores gastos de {{ ano }} e quanto gastaram nos outros anos do mandato{% if d.parcial %} (mesmo período){% endif %}.</p>
+    <div class="aviso-cota"><i data-lucide="info"></i><span><strong>Isto não é salário.</strong> São reembolsos da cota parlamentar (CEAP), despesas do mandato (aluguel de carro, divulgação, combustível, escritório…) pagas <strong>à parte do salário</strong> (subsídio de R$ 46.366/mês).</span></div>
+    <div class="table-scroll">
+    <table class="rank-table yr-table">
+      <thead><tr><th class="rk">#</th><th>Deputado</th>{% for a in d.anos_mandato %}<th class="num {{ 'cur' if a==ano }}">{{ a }}</th>{% endfor %}</tr></thead>
+      <tbody>{% for r in d.ranking_multi %}<tr>
+        <td class="rk">{{ loop.index }}</td>
+        <td><a href="/relatorio?escopo=deputado&alvo={{ r.id }}&ano={{ ano }}">{{ r.nome }}</a> <span class="muted" style="font-size:11px">{{ r.sigla_partido }}-{{ r.sigla_uf }}</span></td>
+        {% for a in d.anos_mandato %}<td class="num {{ 'cur' if a==ano }}">{{ r.por_ano[a] | brl }}</td>{% endfor %}
+      </tr>{% endfor %}</tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<div class="wrap wrap-wide">
+  <h2 class="h2" style="margin:8px 0 12px">Últimas votações</h2>
+  <div class="feed-list">
+    {% for item in d.ultimas %}
+    <a class="card feed-item" href="/votacoes/{{ item.id }}">
+      <div class="icn icn-{{ item.kind }}"><i data-lucide="{{ 'check' if item.kind=='aprovado' else 'x' if item.kind=='rejeitado' else 'clock' }}"></i></div>
+      <div style="flex:1;min-width:0">
+        <span class="eyebrow" style="text-transform:none;letter-spacing:0">{{ item.sigla_orgao }} · {{ item.data }}</span>
+        <div class="ft">{{ item.titulo }}</div>
+        <div class="meta">{% if item.objeto %}<span class="tag">{{ item.objeto }}</span>{% endif %}<span class="res" style="color:{{ 'var(--clay-700)' if item.kind=='rejeitado' else 'var(--green-700)' }}">{{ item.kind|capitalize }} · {{ item.sim }} a {{ item.nao }}</span></div>
+      </div>
+      <i data-lucide="chevron-right" class="muted"></i>
+    </a>
+    {% endfor %}
+  </div>
+</div>

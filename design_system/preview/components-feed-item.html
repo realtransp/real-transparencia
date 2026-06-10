@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_card.css">
+<style>
+  .lead { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); margin-bottom: 12px; }
+  .item { display: flex; gap: 14px; background: var(--paper-1); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; box-shadow: var(--shadow-sm); }
+  .item + .item { margin-top: 10px; }
+  .icn { width: 38px; height: 38px; border-radius: var(--radius-md); display:flex; align-items:center; justify-content:center; flex:none; }
+  .icn svg { width: 19px; height: 19px; }
+  .ap { background: var(--green-100); color: var(--green-700); }
+  .rj { background: var(--clay-100); color: var(--clay-700); }
+  .when { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); }
+  .ttl { font-family: var(--font-serif); font-weight: 600; font-size: 16px; color: var(--fg-1); margin: 3px 0 4px; line-height: 1.25; }
+  .sub { font-family: var(--font-sans); font-size: 13px; color: var(--fg-2); }
+  .res { font-family: var(--font-mono); font-size: 11px; font-weight: 600; }
+</style>
+</head>
+<body>
+  <div class="lead">Item de feed — "o que tá rolando"</div>
+  <div class="item">
+    <div class="icn ap"><i data-lucide="check"></i></div>
+    <div>
+      <div class="when">Plenário · há 2 horas</div>
+      <div class="ttl">Aprovado o marco legal da inteligência artificial</div>
+      <div class="sub">PL 2338/2023 · <span class="res" style="color:var(--green-700)">312 a 138</span> · 13 ausentes</div>
+    </div>
+  </div>
+  <div class="item">
+    <div class="icn rj"><i data-lucide="x"></i></div>
+    <div>
+      <div class="when">Comissão · ontem</div>
+      <div class="ttl">Rejeitada a urgência para o projeto do salário mínimo</div>
+      <div class="sub">REQ 45/2024 · <span class="res" style="color:var(--clay-700)">9 a 14</span> · CCJ</div>
+    </div>
+  </div>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

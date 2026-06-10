@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% from "_components.html" import avatar, party_tag, vote_badge, cobre_button, stat_card %}
+{% block title %}{{ dep.nome }} · R$ Transparência{% endblock %}
+{% block content %}
+<div class="dep-hero">
+  <div class="wrap wrap-wide dep-hero-in">
+    <div class="dep-top">
+      {{ avatar(dep.nome, dep.url_foto, dep.sigla_partido, 84) }}
+      <div style="flex:1">
+        <div class="dep-name">{{ dep.nome }}</div>
+        <div class="dep-meta">
+          {{ party_tag(dep.sigla_partido, dep.sigla_uf, dep.situacao) }}
+        </div>
+        <div class="dep-bio">
+          {% if eleicao and eleicao.candidaturas %}Eleito(a) em {{ eleicao.candidaturas[0].ano_eleicao }} ({{ eleicao.candidaturas[0].situacao | lower }}).{% endif %}
+          Dados de votação, presença, gastos e eleição extraídos dos dados abertos da Câmara e do TSE.
+        </div>
+      </div>
+      <div class="dep-actions">
+        <a class="btn btn-secondary" href="/deputados/{{ dep.id }}/gastos"><i data-lucide="receipt"></i>Ver gastos</a>
+        {{ cobre_button(dep) }}
+      </div>
+    </div>
+    <div class="dep-stats">
+      <div class="dep-stat">
+        <div class="v" style="color:{{ 'var(--clay-600)' if dep.presence is not none and dep.presence < 70 else 'var(--fg-1)' }}">{{ (dep.presence ~ '%') if dep.presence is not none else '—' }}</div>
+        <div class="l">Presença em plenário</div>
+      </div>
+      <div class="dep-stat"><div class="v">{{ stats.participou | num }}</div><div class="l">Votações em {{ stats.ano }}</div></div>
+      <div class="dep-stat"><div class="v" style="color:var(--green-700)">{{ stats.votes_for | num }}</div><div class="l">Votou "Sim"</div></div>
+      <div class="dep-stat"><div class="v" style="color:var(--clay-600)">{{ stats.cota_ano | brl }}</div><div class="l">Cota gasta · {{ stats.ano }}</div></div>
+    </div>
+    <div class="tabs" data-tabs>
+      <div class="tab on" data-tab="votos">Votações</div>
+      <div class="tab" data-tab="gastos">Gastos</div>
+      <div class="tab" data-tab="sobre">Sobre</div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap wrap-wide dep-body">
+  <div class="card card-pad ia-card" style="margin-bottom:20px">
+    <span class="eyebrow">Análise em linguagem simples</span>
+    <div id="resumo" style="margin-top:10px" hx-post="/api/resumo/deputado/{{ dep.id }}" hx-trigger="load" hx-swap="innerHTML">
+      <p class="muted">Preparando análise…</p>
+    </div>
+  </div>
+
+  <h2 class="h2" style="margin:8px 0 12px">Votações em {{ stats.ano }}</h2>
+  <div class="stat-grid" style="margin-bottom:24px">
+    {{ stat_card('Participou', (stats.participou | num) ~ ' de ' ~ (stats.total_ano | num), stats.pct_part ~ '% das votações do ano',
+        'var(--clay-600)' if stats.pct_part < 70 else 'var(--green-700)') }}
+    {{ stat_card('Votou Sim', stats.votes_for | num,
+        ((100 * stats.votes_for / stats.participou) | round | int) ~ '% dos votos' if stats.participou else '—', 'var(--green-700)') }}
+    {{ stat_card('Votou Não', stats.votes_against | num,
+        ((100 * stats.votes_against / stats.participou) | round | int) ~ '% dos votos' if stats.participou else '—', 'var(--clay-600)') }}
+    {{ stat_card('Não votou (faltou)', stats.faltou | num,
+        (stats.outros ~ ' abstenções/obstruções') if stats.outros else 'ausente nas demais') }}
+  </div>
+
+  <h2 class="h2" style="margin:8px 0 12px">Salário e trabalho</h2>
+  <div class="stat-grid" style="margin-bottom:8px">
+    {{ stat_card('Salário mensal', salario.mensal | brl, 'subsídio fixo, igual p/ todos') }}
+    {{ stat_card('Recebido em ' ~ trabalho.ano, salario.recebido_ano | brl, salario.meses_ano ~ ' meses', 'var(--green-700)') }}
+    {{ stat_card('Estimativa no mandato', salario.total_mandato | brl, salario.meses_mandato ~ ' meses · desde fev/2023', 'var(--green-700)') }}
+    {{ stat_card('Dias com presença · ' ~ trabalho.ano, trabalho.dias_presenca | num, 'de ' ~ (trabalho.dias_uteis | num) ~ ' dias úteis') }}
+  </div>
+  <p class="muted" style="font-size:11.5px;margin-bottom:22px">Salário = subsídio fixo do deputado, igual para todos; é diferente da cota (CEAP) e da verba de gabinete. O total no mandato é estimativa pelo valor atual × meses da 57ª legislatura.</p>
+
+  <h2 class="h2" style="margin:8px 0 12px">Ao longo do mandato (por ano)</h2>
+  <p class="muted" style="font-size:13px;margin-bottom:10px">Como a atuação e o gasto variaram desde 2022, útil pra ver tendência.</p>
+  <div class="card" style="overflow:hidden;margin-bottom:26px">
+    <table class="rank-table">
+      <thead><tr><th>Ano</th><th class="num">Gasto da cota</th><th class="num">Votações</th><th class="num">Votou Sim</th><th class="num">Votou Não</th></tr></thead>
+      <tbody>
+        {% for s in serie %}
+        <tr>
+          <td class="data" style="font-weight:600">{{ s.ano }}{% if s.ano == stats.ano %} <span class="muted" style="font-size:10px">· atual</span>{% endif %}</td>
+          <td class="num">{{ s.gasto | brl }}</td>
+          <td class="num">{{ s.participou | num }}</td>
+          <td class="num" style="color:var(--green-700)">{{ s.sim | num }}</td>
+          <td class="num" style="color:var(--clay-600)">{{ s.nao | num }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div data-panel="votos">
+    <div class="card card-pad">
+      <h3 class="h3" style="margin-bottom:6px">Como {{ dep.nome.split(' ')[0] }} votou</h3>
+      <p class="muted" style="font-size:13.5px;margin-bottom:8px">Proposições mais recentes em que votou (turnos e destaques agrupados).</p>
+      {% for rv in votos %}
+      <a class="vote-row" href="/votacoes/{{ rv.id }}" style="cursor:pointer">
+        <div class="vt">
+          <div class="t">{{ rv.titulo }}</div>
+          <div class="c">{{ rv.data }}{% if rv.objeto %} · {{ rv.objeto }}{% endif %}{% if rv.n > 1 %} · {{ rv.n }} votações{% endif %}</div>
+        </div>
+        {% if rv.n == 1 %}
+          {{ vote_badge('sim' if rv.sim else 'nao' if rv.nao else 'abs') }}
+        {% else %}
+          <div class="vote-multi">
+            {% if rv.sim %}<span class="vm vm-sim">{{ rv.sim }}× Sim</span>{% endif %}
+            {% if rv.nao %}<span class="vm vm-nao">{{ rv.nao }}× Não</span>{% endif %}
+            {% if rv.outros %}<span class="vm vm-out">{{ rv.outros }}× outros</span>{% endif %}
+          </div>
+        {% endif %}
+        <i data-lucide="chevron-right" class="muted"></i>
+      </a>
+      {% else %}<p class="muted">Sem votos nominais registrados.</p>{% endfor %}
+    </div>
+  </div>
+
+  <div data-panel="gastos" style="display:none">
+    <div class="card card-pad">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div>
+          <h3 class="h3">Resumo da cota · {{ stats.ano }}</h3>
+          <p class="muted" style="font-size:13.5px">Gastou <strong class="data" style="color:var(--clay-600)">{{ financeiro.total | brlf }}</strong>{% if cota.limite_anual %} de ~<strong class="data">{{ cota.limite_anual | brlf }}</strong> no ano (12× o limite mensal){% endif %}</p>
+        </div>
+        <a class="btn btn-ghost btn-sm" href="/deputados/{{ dep.id }}/gastos">Detalhar <i data-lucide="arrow-right"></i></a>
+      </div>
+
+      {% if cota.pct is not none %}
+      <div style="margin-bottom:14px">
+        <div class="cota-bar"><div class="cota-fill" style="width:{{ [cota.pct,100]|min }}%;background:{{ 'var(--clay-600)' if cota.pct >= 90 else 'var(--green-600)' }}"></div></div>
+        <p class="muted" style="font-size:12px;margin-top:6px">Usou <strong>{{ cota.pct }}%</strong> do limite da cota de {{ dep.sigla_uf }} ({{ cota.limite_mensal | brl }}/mês).</p>
+      </div>
+      {% endif %}
+
+      <p class="fg-explain" style="margin-bottom:16px"><i data-lucide="info"></i> A <strong>cota parlamentar (CEAP)</strong> é uma verba pública mensal para gastos do mandato (passagens, combustível, aluguel de escritório, divulgação etc.). O limite varia por estado (pela distância a Brasília) e <strong>não vira dinheiro no bolso</strong>: o deputado gasta e é reembolsado com nota fiscal. É diferente do salário e da verba de gabinete.</p>
+      {% set maxcat = financeiro.por_categoria[0].total if financeiro.por_categoria else 1 %}
+      {% for c in financeiro.por_categoria[:6] %}
+      <div class="cat-row">
+        <div class="cat-label"><span class="sq" style="background:var(--viz-{{ loop.index }})"></span>{{ c.categoria }}</div>
+        <div class="data" style="font-size:13.5px">{{ c.total | brlf }}</div>
+        <div class="cat-track"><div class="fill" style="width:{{ ((c.total / maxcat) * 100)|round|int }}%;background:var(--viz-{{ loop.index }})"></div></div>
+      </div>
+      {% else %}<p class="muted">Sem despesas registradas.</p>{% endfor %}
+    </div>
+  </div>
+
+  <div data-panel="sobre" style="display:none">
+    <div class="card card-pad">
+      <h3 class="h3" style="margin-bottom:10px">Sobre o mandato</h3>
+      <p class="t-body" style="margin-bottom:4px">{{ dep.nome }} ({{ dep.sigla_partido }}-{{ dep.sigla_uf }}), {{ dep.situacao }}. Dados de votação, presença, gastos e eleição vêm dos dados abertos da Câmara e do TSE.</p>
+      <div style="display:flex;gap:14px;margin-top:18px;flex-wrap:wrap">
+        {% if dep.email %}<span class="tag"><i data-lucide="mail" style="width:13px;height:13px"></i>{{ dep.email }}</span>{% endif %}
+        {% if dep.telefone %}<span class="tag" title="Telefone fixo do gabinete em Brasília (não é celular nem WhatsApp)"><i data-lucide="phone" style="width:13px;height:13px"></i>(61) {{ dep.telefone }} · gabinete</span>{% endif %}
+        <span class="tag"><i data-lucide="landmark" style="width:13px;height:13px"></i>{{ dep.sigla_partido }} · {{ dep.sigla_uf }}</span>
+        {% if presenca %}<span class="tag"><i data-lucide="user-check" style="width:13px;height:13px"></i>{{ presenca.presencas }} de {{ presenca.total_eventos }} sessões</span>{% endif %}
+      </div>
+    </div>
+
+    {% if eleicao and (eleicao.candidaturas or eleicao.doacoes) %}
+    <div class="card card-pad" style="margin-top:18px">
+      <h3 class="h3" style="margin-bottom:10px">Eleições (TSE)</h3>
+      {% if eleicao.candidaturas %}
+      <table class="rank-table">
+        <thead><tr><th>Ano</th><th>Partido</th><th>UF</th><th>Situação</th></tr></thead>
+        <tbody>{% for c in eleicao.candidaturas %}<tr><td class="data">{{ c.ano_eleicao }}</td><td>{{ c.sigla_partido }}</td><td class="muted">{{ c.sigla_uf }}</td><td>{{ c.situacao }}</td></tr>{% endfor %}</tbody>
+      </table>{% endif %}
+      {% if eleicao.doacoes %}
+      <h4 style="font-family:var(--font-serif);font-size:16px;margin:16px 0 8px">Maiores doadores de campanha</h4>
+      {% for d in eleicao.doacoes %}<div class="cat-row"><div class="cat-label">{{ d.doador }}</div><div class="data" style="font-size:13.5px">{{ d.total | brlf }}</div></div>{% endfor %}
+      {% endif %}
+    </div>{% endif %}
+  </div>
+</div>
+{% endblock %}

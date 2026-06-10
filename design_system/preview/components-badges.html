@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_card.css">
+<style>
+  .lead { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); margin: 0 0 8px; }
+  .grp + .lead { margin-top: 16px; }
+  /* Party tag */
+  .tag { display:inline-flex; align-items:center; gap:6px; font-family: var(--font-mono); font-size: 11px; font-weight: 500; padding: 4px 9px; border-radius: var(--radius-sm); background: var(--paper-2); color: var(--fg-2); border: 1px solid var(--border); }
+  .tag .sq { width: 8px; height: 8px; border-radius: 2px; }
+  /* Vote badge */
+  .vote { display:inline-flex; align-items:center; gap:6px; font-family: var(--font-sans); font-size: 13px; font-weight: 700; padding: 5px 11px; border-radius: var(--radius-pill); }
+  .vote svg { width: 14px; height: 14px; }
+  .v-sim { background: var(--status-aprovado-bg); color: var(--green-700); }
+  .v-nao { background: var(--status-rejeitado-bg); color: var(--clay-700); }
+  .v-abs { background: var(--status-ausente-bg); color: var(--ink-2); }
+</style>
+</head>
+<body>
+  <div class="lead">Tags de partido / UF</div>
+  <div class="row-wrap">
+    <span class="tag"><span class="sq" style="background:var(--green-600)"></span>PT · SP</span>
+    <span class="tag"><span class="sq" style="background:var(--petro-500)"></span>PSDB · MG</span>
+    <span class="tag"><span class="sq" style="background:var(--amber-500)"></span>MDB · BA</span>
+    <span class="tag"><span class="sq" style="background:var(--clay-600)"></span>PL · RJ</span>
+    <span class="tag"><span class="sq" style="background:var(--ochre-600)"></span>NOVO · RS</span>
+  </div>
+  <div class="lead">Como votou</div>
+  <div class="row-wrap">
+    <span class="vote v-sim"><i data-lucide="check"></i>Votou Sim</span>
+    <span class="vote v-nao"><i data-lucide="x"></i>Votou Não</span>
+    <span class="vote v-abs"><i data-lucide="minus"></i>Absteve-se</span>
+    <span class="vote v-abs"><i data-lucide="user-x"></i>Ausente</span>
+  </div>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

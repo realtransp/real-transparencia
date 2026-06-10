@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>Para onde vai o seu dinheiro na Câmara?</h1>
+  <p class="lead">Gastos, votações, presença, salário e eleições dos deputados federais,
+  em linguagem simples, a partir dos dados oficiais.</p>
+</section>
+
+<section class="cards">
+  <div class="card stat">
+    <span class="big">{{ stats.total_gasto | brl }}</span>
+    <span class="label">gasto total registrado (cota parlamentar)</span>
+  </div>
+  <div class="card stat">
+    <span class="big">{{ stats.n_deputados | num }}</span>
+    <span class="label">deputados</span>
+  </div>
+  <div class="card stat">
+    <span class="big">{{ stats.n_votacoes | num }}</span>
+    <span class="label">votações</span>
+  </div>
+  <div class="card stat">
+    <span class="big">{{ stats.n_despesas | num }}</span>
+    <span class="label">despesas registradas</span>
+  </div>
+</section>
+
+<div class="grid-2">
+  <section>
+    <h2>Quem mais gastou</h2>
+    <ol class="ranklist">
+      {% for d in top_gastos %}
+      <li>
+        <a href="/deputados/{{ d.id }}">{{ d.nome }}</a>
+        <span class="muted">{{ d.sigla_partido }}-{{ d.sigla_uf }}</span>
+        <strong>{{ d.total | brl }}</strong>
+      </li>
+      {% else %}
+      <li class="muted">Sem dados ainda, rode a ingestão.</li>
+      {% endfor %}
+    </ol>
+    <a class="btn" href="/gastos">Ver ranking completo →</a>
+  </section>
+
+  <section>
+    <h2>Votações recentes</h2>
+    <ul class="votlist">
+      {% for v in votacoes %}
+      <li>
+        <a href="/votacoes/{{ v.id }}">{{ v.descricao or v.proposicao or v.id }}</a>
+        <span class="muted">{{ v.data }}</span>
+      </li>
+      {% else %}
+      <li class="muted">Sem dados ainda, rode a ingestão.</li>
+      {% endfor %}
+    </ul>
+    <a class="btn" href="/votacoes">Ver todas →</a>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% from "_components.html" import avatar, vote_badge, ad_unit %}
+{% block title %}Votação · R$ Transparência{% endblock %}
+{% block content %}
+{% set total = (sim + nao + outros) or 1 %}
+<div class="wrap wrap-narrow vot-head">
+  <a class="eyebrow" style="cursor:pointer;color:var(--green-700)" href="/agora">← Voltar pro feed</a>
+  <div style="display:flex;gap:10px;align-items:center;margin:14px 0 6px;flex-wrap:wrap">
+    {% if v.objeto %}<span class="tag">{{ v.objeto }}</span>{% endif %}
+    <span class="muted" style="font-size:13px">{{ v.sigla_orgao }} · {{ v.data }}</span>
+  </div>
+  <h1 class="h1">{{ v.titulo }}</h1>
+  {% if v.titulo_ia and v.ementa %}<p class="lead" style="font-size:15px;margin-top:10px">{{ v.ementa }}</p>{% endif %}
+  {% if v.descricao %}<p class="muted" style="font-size:13px;margin-top:6px">{{ v.descricao }}</p>{% endif %}
+
+  {% if texto %}
+  <div class="texto-orig">
+    {% if texto.inteiro_teor %}<a class="btn btn-secondary btn-sm" href="{{ texto.inteiro_teor }}" target="_blank" rel="noopener"><i data-lucide="file-text"></i>Texto original ({{ texto.rotulo }})</a>{% endif %}
+    <a class="btn btn-ghost btn-sm" href="{{ texto.camara }}" target="_blank" rel="noopener"><i data-lucide="external-link"></i>Acompanhar na Câmara</a>
+  </div>
+  {% endif %}
+
+  <div class="card card-pad ia-card" style="margin-top:16px">
+    <span class="eyebrow">Análise: o que muda na prática</span>
+    <div id="resumo" style="margin-top:10px" hx-post="/api/resumo/votacao/{{ v.id }}" hx-trigger="load" hx-swap="innerHTML">
+      <p class="muted">Preparando análise…</p>
+    </div>
+  </div>
+
+  {% if kind != 'tramitando' %}
+  <div class="result-banner rb-{{ kind }}">
+    <div class="rk" style="background:{{ 'var(--green-600)' if kind=='aprovado' else 'var(--clay-600)' }};color:#fff">
+      <i data-lucide="{{ 'check' if kind=='aprovado' else 'x' }}"></i>
+    </div>
+    <div>
+      <div class="rt" style="color:{{ 'var(--green-700)' if kind=='aprovado' else 'var(--clay-700)' }}">
+        {{ 'Aprovado' if kind=='aprovado' else 'Rejeitado' }} · {{ sim }} a {{ nao }}
+      </div>
+      <div class="muted" style="font-size:13px">{{ outros }} em abstenção/obstrução · {{ total }} votos nominais</div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if total > 1 %}
+  <div class="tally-bar">
+    <div class="seg" style="width:{{ (sim/total*100)|round(1) }}%;background:var(--green-600)"></div>
+    <div class="seg" style="width:{{ (nao/total*100)|round(1) }}%;background:var(--clay-600)"></div>
+    <div class="seg" style="width:{{ (outros/total*100)|round(1) }}%;background:var(--ink-3)"></div>
+  </div>
+  <div class="tally">
+    <div class="tally-col"><span class="vote v-sim"><i data-lucide="check"></i>{{ sim }} Sim</span></div>
+    <div class="tally-col" style="text-align:center"><span class="vote v-nao"><i data-lucide="x"></i>{{ nao }} Não</span></div>
+    <div class="tally-col" style="text-align:right"><span class="vote v-abs"><i data-lucide="minus"></i>{{ outros }} outros</span></div>
+  </div>
+
+  {{ ad_unit(adsense_slot_artigo) }}
+
+  <h3 class="h3" style="margin:34px 0 12px">Como votaram os partidos</h3>
+  <div class="card card-pad">
+    {% for p in partidos %}
+    {% set pt = (p.sim + p.nao) or 1 %}
+    <div class="party-row">
+      <span class="tag" style="justify-content:center">{{ p.party or '—' }}</span>
+      <div>
+        <div class="party-bar">
+          <div class="pf" style="width:{{ (p.sim/pt*100)|round(1) }}%"></div>
+          <div class="pa" style="width:{{ (p.nao/pt*100)|round(1) }}%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:5px">
+          <span class="data" style="font-size:11.5px;color:var(--green-700)">{{ p.sim }} sim</span>
+          <span class="data" style="font-size:11.5px;color:var(--clay-700)">{{ p.nao }} não</span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <h3 class="h3" style="margin:34px 0 12px">Voto por deputado</h3>
+  <div class="votos-tool">
+    <div class="votos-search">
+      <i data-lucide="search"></i>
+      <input class="js-votos-search" placeholder="Buscar deputado por nome…">
+    </div>
+    <div class="votos-chips">
+      <button class="chip on js-vfilter" data-vote="all">Todos · {{ chip.all }}</button>
+      <button class="chip js-vfilter" data-vote="sim">Sim · {{ chip.sim }}</button>
+      <button class="chip js-vfilter" data-vote="nao">Não · {{ chip.nao }}</button>
+      <button class="chip js-vfilter" data-vote="outros">Abstenção/outros · {{ chip.outros }}</button>
+    </div>
+  </div>
+  <div class="alpha-bar js-alpha-bar">
+    <button class="alpha on" data-letter="all">Todas</button>
+    {% for L in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' %}<button class="alpha" data-letter="{{ L }}">{{ L }}</button>{% endfor %}
+  </div>
+  <div class="card card-pad js-votos-list">
+    {% for dv in votos %}
+    <a class="vote-row voto-item" href="/deputados/{{ dv.deputado_id }}"
+       data-name="{{ dv.nome|lower }}" data-vote="{{ vote_kind(dv.voto) }}">
+      {{ avatar(dv.nome, None, dv.sigla_partido, 40) }}
+      <div class="vt">
+        <div class="t">{{ dv.nome }}</div>
+        <div class="c">{{ dv.sigla_partido }} · {{ dv.sigla_uf }}</div>
+      </div>
+      {{ vote_badge(vote_kind(dv.voto)) }}
+    </a>
+    {% endfor %}
+    <p class="muted js-votos-empty" style="display:none;padding:14px 4px">Nenhum deputado encontrado.</p>
+  </div>
+  {% else %}
+  <p class="muted" style="margin-top:20px">Esta votação não teve votos nominais registrados (votação simbólica).</p>
+  {% endif %}
+</div>
+{% endblock %}

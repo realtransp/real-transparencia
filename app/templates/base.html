@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}R$ Transparência{% endblock %}</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32.png">
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+  <meta name="theme-color" content="#163A2C">
+  <meta name="description" content="{% block meta_desc %}Gastos da cota, votações e presença dos 513 deputados, em linguagem clara. E quando não gostar, cobre seu deputado.{% endblock %}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="R$ Transparência">
+  <meta property="og:title" content="{% block og_title %}R$ Transparência: onde o seu dinheiro vira voto{% endblock %}">
+  <meta property="og:description" content="{% block og_desc %}Gastos da cota, votações e presença dos 513 deputados, em linguagem clara.{% endblock %}">
+  <meta property="og:image" content="{{ og_base }}/static/og.png">
+  <meta property="og:url" content="{{ og_base }}{{ request.url.path }}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="{{ og_base }}/static/og.png">
+  <link rel="stylesheet" href="/static/colors_and_type.css">
+  <link rel="stylesheet" href="/static/portal.css">
+  <link rel="stylesheet" href="/static/overrides.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  {% if adsense_client %}<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ adsense_client }}" crossorigin="anonymous"></script>{% endif %}
+  <script defer src="/static/app.js"></script>
+</head>
+<body>
+{% from "_components.html" import cobre_modal %}
+<div class="app">
+  <header class="nav">
+    <div class="wrap wrap-wide nav-in">
+      <a class="brand" href="/">
+        <div class="mark js-brand-mark">R$</div>
+        <div class="wm"><span class="r js-brand-prefix">R$</span> Transparência</div>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Abrir menu" aria-expanded="false">
+        <i data-lucide="menu"></i>
+      </button>
+      <nav class="nav-links" id="navLinks">
+        <a href="/relatorio" class="{{ 'on' if active=='raiox' }}">Raio-X</a>
+        <a href="/gastos" class="{{ 'on' if active=='gastos' }}">Gastos</a>
+        <a href="/agora" class="{{ 'on' if active=='feed' }}">Agora</a>
+        <a href="/deputados" class="{{ 'on' if active=='deputy' }}">Deputados</a>
+        <a href="/votacoes" class="{{ 'on' if active=='votacao' }}">Votações</a>
+        <a href="/deputados" class="nav-link-search"><i data-lucide="search"></i>Buscar deputado</a>
+      </nav>
+      <div class="nav-right">
+        <a class="nav-search" href="/deputados">
+          <i data-lucide="search"></i><span>Buscar deputado…</span>
+        </a>
+      </div>
+    </div>
+  </header>
+  <script>
+  (function(){
+    var t=document.getElementById('navToggle'), l=document.getElementById('navLinks');
+    if(t&&l){ t.addEventListener('click',function(){
+      var o=l.classList.toggle('open'); t.setAttribute('aria-expanded',o);
+      t.innerHTML=o?'<i data-lucide="x"></i>':'<i data-lucide="menu"></i>';
+      if(window.lucide)lucide.createIcons();
+    }); }
+  })();
+  </script>
+
+  <main style="flex:1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <div class="wrap wrap-wide">
+      <div class="footer-in">
+        <div style="max-width:280px">
+          <div class="brand" style="margin-bottom:12px">
+            <div class="mark" style="width:30px;height:30px;font-size:13px">R$</div>
+            <div class="wm"><span class="r">R$</span> Transparência</div>
+          </div>
+          <p style="font-size:13px;line-height:1.6;color:var(--green-200)">
+            Observatório independente sobre a Câmara dos Deputados. Dados públicos, leitura clara.
+          </p>
+        </div>
+        <div class="footer-cols">
+          <div class="footer-col">
+            <h5>Explorar</h5>
+            <a href="/agora">O que tá rolando</a>
+            <a href="/deputados">Deputados</a>
+            <a href="/votacoes">Votações</a>
+            <a href="/gastos">Gastos da cota</a>
+          </div>
+          <div class="footer-col">
+            <h5>Fontes</h5>
+            <a href="https://dadosabertos.camara.leg.br" target="_blank" rel="noopener">Dados Abertos da Câmara</a>
+            <a href="https://dadosabertos.tse.jus.br" target="_blank" rel="noopener">Dados Abertos do TSE</a>
+            <a href="/sugestoes">Sugestões</a>
+            <a href="/componentes">Design system</a>
+          </div>
+        </div>
+      </div>
+      <p class="footer-note">
+        Site independente, sem vínculo com a Câmara dos Deputados ou com o Governo Federal.
+        Os dados vêm da API e dos arquivos de Dados Abertos da Câmara e do TSE.
+      </p>
+    </div>
+  </footer>
+</div>
+
+{{ cobre_modal() }}
+<div id="toast" class="toast" style="display:none"><i data-lucide="check-circle"></i><span class="js-toast-text"></span></div>
+
+<!-- Balão de sugestões (anônimo) -->
+<div class="sug-fab">
+  <div class="sug-pop" id="sugPop">
+    <div class="sug-pop-head"><strong>Deixe uma sugestão</strong><button type="button" id="sugClose" aria-label="Fechar"><i data-lucide="x"></i></button></div>
+    <p class="sug-hint">É <strong>anônimo</strong>, não pedimos seu nome. Achou algo errado, faltou algo, tem uma ideia? Conta aí.</p>
+    <form hx-post="/api/sugestao" hx-target="#sugResult" hx-swap="innerHTML" id="sugForm">
+      <input type="hidden" name="pagina" id="sugPagina" value="">
+      <textarea name="texto" rows="4" placeholder="Sua ideia, crítica ou o que faltou…" required></textarea>
+      <button class="btn btn-amber btn-block" type="submit">Enviar sugestão</button>
+    </form>
+    <div id="sugResult"></div>
+  </div>
+  <button class="sug-trigger" id="sugTrigger" aria-label="Deixar sugestão">
+    <i data-lucide="message-square-plus"></i><span>Sugestão</span>
+  </button>
+</div>
+<script>
+(function(){
+  var fab=document.querySelector('.sug-fab'), t=document.getElementById('sugTrigger'),
+      c=document.getElementById('sugClose'), pg=document.getElementById('sugPagina');
+  function open(o){ fab.classList.toggle('open',o); if(o&&pg) pg.value=location.pathname; }
+  if(t) t.addEventListener('click',function(){ open(!fab.classList.contains('open')); });
+  if(c) c.addEventListener('click',function(){ open(false); });
+})();
+</script>
+</body>
+</html>

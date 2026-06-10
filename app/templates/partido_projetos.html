@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Projetos do {{ sigla }} · R$ Transparência{% endblock %}
+{% block content %}
+<div class="wrap wrap-wide page-head">
+  <a class="eyebrow" style="cursor:pointer;color:var(--green-700)" href="/relatorio?escopo=partido&alvo={{ sigla|urlencode }}&ano={{ ano }}">← Raio-X do {{ sigla }}</a>
+  <h1 class="h1" style="margin-top:8px">Projetos de lei do {{ sigla }}</h1>
+  <p class="lead" style="margin-top:8px;font-size:16px">Projetos apresentados pela bancada no mandato (desde {{ anos[0] }}) e quem assina cada um.</p>
+
+  <div class="rx-filter" style="margin-top:14px">
+    <a class="rx-tab {{ 'on' if desfecho=='lei' }}" href="/partido/{{ sigla|urlencode }}/projetos?desfecho=lei&ano={{ ano }}">Viraram lei · {{ counts.lei }}</a>
+    <a class="rx-tab {{ 'on' if desfecho=='arquivado' }}" href="/partido/{{ sigla|urlencode }}/projetos?desfecho=arquivado&ano={{ ano }}">Arquivados · {{ counts.arquivado }}</a>
+    <a class="rx-tab {{ 'on' if desfecho=='todos' }}" href="/partido/{{ sigla|urlencode }}/projetos?desfecho=todos&ano={{ ano }}">Todos · {{ counts.apresentados }}</a>
+  </div>
+</div>
+
+<div class="wrap wrap-wide" style="padding-bottom:48px">
+  {% if desfecho == 'lei' %}<p class="muted" style="font-size:13px;margin-bottom:14px">Projetos da bancada que se tornaram <strong>norma jurídica (lei)</strong>.</p>
+  {% elif desfecho == 'arquivado' %}<p class="muted" style="font-size:13px;margin-bottom:14px">Projetos da bancada que foram <strong>arquivados ou retirados</strong>.</p>
+  {% else %}<p class="muted" style="font-size:13px;margin-bottom:14px">Todos os projetos de lei apresentados pela bancada, a maioria segue em tramitação.</p>{% endif %}
+
+  <div class="prop-list">
+    {% for p in lista %}
+    <div class="prop-card">
+      <div class="prop-card-top">
+        <span class="prop-tag">{{ p.rotulo }}</span>
+        {% set sl = (p.situacao or '')|lower %}
+        {% if 'norma' in sl or 'lei' in sl %}<span class="prop-st st-lei">Virou lei</span>
+        {% elif 'arquiv' in sl or 'retirad' in sl or 'rejeitad' in sl or 'prejud' in sl %}<span class="prop-st st-arq">{{ p.situacao }}</span>
+        {% else %}<span class="prop-st st-tram">{{ p.situacao or 'Em tramitação' }}</span>{% endif %}
+      </div>
+      <div class="prop-em">{{ p.ementa or 'Sem ementa.' }}</div>
+      <div class="prop-card-foot">
+        <span class="prop-autor"><i data-lucide="user"></i><a href="/deputados/{{ p.autor_id }}">{{ p.autor }}</a>{% if p.n_aut > 1 %} <span class="muted">+{{ p.n_aut - 1 }} coautor(es) da bancada</span>{% endif %}</span>
+        <span class="prop-links">
+          {% if p.data_apresentacao %}<span class="muted" style="font-size:12px">{{ p.data_apresentacao }}</span>{% endif %}
+          {% if p.url_inteiro_teor %}<a href="{{ p.url_inteiro_teor }}" target="_blank" rel="noopener"><i data-lucide="file-text"></i>Texto</a>{% endif %}
+          <a href="https://www.camara.leg.br/propostas-legislativas/{{ p.id }}" target="_blank" rel="noopener"><i data-lucide="external-link"></i>Câmara</a>
+        </span>
+      </div>
+    </div>
+    {% else %}<p class="muted">Nenhum projeto neste filtro.</p>{% endfor %}
+  </div>
+</div>
+{% endblock %}

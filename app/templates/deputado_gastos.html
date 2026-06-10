@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% from "_components.html" import cobre_button, stat_card, month_rows %}
+{% block title %}Gastos de {{ dep.nome }} · R$ Transparência{% endblock %}
+{% block content %}
+<div class="wrap wrap-wide page-head">
+  <a class="eyebrow" style="color:var(--green-700)" href="/relatorio">↗ Ver panorama geral de gastos da Câmara</a>
+  <h1 class="h1" style="margin-top:8px">Para onde foi a cota: {{ dep.nome }}</h1>
+  <p class="lead" style="margin-top:8px;font-size:16px;max-width:60ch">
+    Cada real que {{ dep.nome.split(' ')[0] }} declarou na cota parlamentar (CEAP) em {{ ano }},
+    e quanto isso representa do limite que o estado dá direito.
+  </p>
+  <form class="filtros" method="get" style="margin-top:12px">
+    <label class="muted" style="align-self:center;font-size:13px">Ano:</label>
+    <select name="ano" onchange="this.form.submit()">
+      {% for a in anos %}<option value="{{ a }}" {{ 'selected' if a==ano }}>{{ a }}</option>{% endfor %}
+    </select>
+    <select name="mes" onchange="this.form.submit()">
+      <option value="">Todos os meses</option>
+      {% set mn = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'] %}
+      {% for i in range(1,13) %}<option value="{{ i }}" {{ 'selected' if i==mes }}>{{ mn[i-1] }}</option>{% endfor %}
+    </select>
+  </form>
+</div>
+
+<div class="wrap wrap-wide" style="padding-top:8px">
+  <div class="stat-grid">
+    {{ stat_card('Gasto em ' ~ ano, financeiro.total | brl, (financeiro.qtd | num) ~ ' notas fiscais', 'var(--clay-600)') }}
+    {{ stat_card('Limite no ano · CEAP ' ~ dep.sigla_uf, (limite_anual | brl) if limite_anual else '—',
+                 ((limite_mensal | brl) ~ '/mês (ref. 2026) · 12×') if limite_mensal else None) }}
+    <div class="stat-card">
+      <div class="sc-l">Quanto usou da cota</div>
+      {% if pct_cota is not none %}
+      <div class="sc-v" style="color:{{ 'var(--clay-600)' if pct_cota >= 90 else 'var(--green-700)' }}">{{ pct_cota }}%</div>
+      <div class="cota-bar"><div class="cota-fill" style="width:{{ [pct_cota,100]|min }}%;background:{{ 'var(--clay-600)' if pct_cota >= 90 else 'var(--green-600)' }}"></div></div>
+      {% else %}<div class="sc-v">—</div>{% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="wrap wrap-wide gastos-grid">
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:4px">Por categoria</h3>
+    <p class="muted" style="font-size:12.5px;margin-bottom:10px">Clique numa categoria para ver as notas fiscais dela.</p>
+    {% set maxcat = financeiro.por_categoria[0].total if financeiro.por_categoria else 1 %}
+    {% for c in financeiro.por_categoria %}
+    <a class="cat-row cat-link {{ 'cat-on' if c.categoria == cat }}" href="/deputados/{{ dep.id }}/gastos?ano={{ ano }}&cat={{ c.categoria | urlencode }}#notas">
+      <div class="cat-label"><span class="sq" style="background:var(--viz-{{ (loop.index0 % 6) + 1 }})"></span>{{ c.categoria }}</div>
+      <div class="data" style="font-size:13.5px">{{ c.total | brlf }}</div>
+      <div class="cat-track"><div class="fill" style="width:{{ ((c.total / maxcat) * 100)|round|int }}%;background:var(--viz-{{ (loop.index0 % 6) + 1 }})"></div></div>
+    </a>
+    {% else %}<p class="muted">Sem despesas registradas.</p>{% endfor %}
+  </div>
+
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:6px">Mês a mês</h3>
+    {{ month_rows(mensal) }}
+  </div>
+</div>
+
+<div class="wrap wrap-wide" id="notas" style="padding-bottom:32px">
+  <div class="card" style="overflow:hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;gap:12px;flex-wrap:wrap">
+      <h3 class="h3">{% if cat %}Notas · {{ cat }}{% else %}Notas fiscais recentes{% endif %}</h3>
+      {% if cat %}<a class="btn btn-ghost btn-sm" href="/deputados/{{ dep.id }}/gastos?ano={{ ano }}#notas">← Todas as categorias</a>{% endif %}
+    </div>
+    <table class="rec-table">
+      <thead><tr><th>Data</th><th>Fornecedor</th><th>Categoria</th><th style="text-align:right">Valor</th></tr></thead>
+      <tbody>
+        {% for r in recibos %}
+        <tr>
+          <td class="data" style="font-size:12.5px;color:var(--fg-2)">{{ r.data_documento or '—' }}</td>
+          <td>{{ r.fornecedor_nome or '—' }}{% if r.fornecedor_cnpj_cpf %}<div class="data muted" style="font-size:11px">{{ r.fornecedor_cnpj_cpf }}</div>{% endif %}</td>
+          <td><span class="tag">{{ r.tipo_despesa }}</span></td>
+          <td class="num" style="white-space:nowrap">
+            {{ r.valor_liquido | brlf }}
+            {% if r.url_documento %}
+            <a href="{{ r.url_documento }}" target="_blank" rel="noopener" title="Abrir nota fiscal oficial" style="margin-left:8px;color:var(--fg-link)"><i data-lucide="file-text" style="width:15px;height:15px;vertical-align:-2px"></i></a>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}<tr><td colspan="4" class="muted">Sem notas registradas.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="band">
+  <div class="wrap wrap-wide band-in">
+    <div>
+      <h2>Achou o gasto alto?</h2>
+      <p>Peça explicação direto pro gabinete de {{ dep.nome.split(' ')[0] }}.</p>
+    </div>
+    {{ cobre_button(dep, label='Cobrar ' ~ dep.nome.split(' ')[0], cls='btn btn-action btn-lg') }}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{# Detalhe financeiro com comparação plurianual (anos do mandato, mesmo período). #}
+{% from "_raiox_macros.html" import barras_ano, cmp_anos %}
+{% set anos = d.anos_mandato %}
+{% set mn = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'] %}
+{% set periodo = ('até ' ~ mn[d.cut-1]) if d.parcial else 'ano cheio' %}
+
+<div class="wrap wrap-wide">
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:4px">Gasto mês a mês: comparação do mandato</h3>
+    <p class="muted" style="font-size:12px;margin-bottom:14px">Cada mês mostra os anos do mandato lado a lado{% if d.parcial %}, só até {{ mn[d.cut-1] }} (mês atual){% endif %}.</p>
+    {{ barras_ano(d.gasto_multiano, anos, d.cut) }}
+  </div>
+</div>
+
+<div class="wrap wrap-wide gastos-grid">
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:4px">Gasto por categoria</h3>
+    <p class="muted" style="font-size:12px;margin-bottom:6px">Comparado ano a ano do mandato ({{ periodo }}).</p>
+    {% for c in d.categorias_cmp %}
+      {{ cmp_anos(c.categoria, c.por_ano, anos, ano) }}
+    {% else %}<p class="muted">Sem gastos no período.</p>{% endfor %}
+  </div>
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:4px">Maiores fornecedores</h3>
+    <p class="muted" style="font-size:12px;margin-bottom:6px">Top do ano atual e o quanto receberam nos anos anteriores ({{ periodo }}).</p>
+    {% for f in d.fornecedores_cmp %}
+      {{ cmp_anos(f.fornecedor, f.por_ano, anos, ano, sub=(f.qtd ~ ' notas')) }}
+    {% else %}<p class="muted">—</p>{% endfor %}
+  </div>
+</div>

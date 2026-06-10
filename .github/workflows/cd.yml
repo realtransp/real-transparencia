@@ -1,0 +1,51 @@
+name: CD (deploy Railway)
+
+# Deploy MANUAL e travado (nunca sobe sozinho, evita gasto/deploy acidental):
+# - Só roda via "Run workflow" (workflow_dispatch). Nunca em push/PR.
+# - Exige digitar "deploy" no campo de confirmação.
+# - Usa o environment "production", que deve ter VOCÊ como required reviewer
+#   (Settings > Environments > production). O job fica "Waiting" até você aprovar.
+# - Roda os testes antes de subir; se falharem, não faz deploy.
+#
+# Segredo necessário: RAILWAY_TOKEN (Settings > Secrets and variables > Actions).
+#   É o token de projeto do Railway (o mesmo usado no `railway up` local).
+on:
+  workflow_dispatch:
+    inputs:
+      confirmar:
+        description: 'Digite "deploy" para confirmar o deploy em produção'
+        required: true
+        default: ""
+
+concurrency:
+  group: cd-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production        # trava: exige aprovação manual (required reviewer)
+    timeout-minutes: 20
+    # Trava extra: só segue se você digitou exatamente "deploy".
+    if: ${{ github.event.inputs.confirmar == 'deploy' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instala uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Roda os testes (porteiro antes do deploy)
+        run: |
+          uv sync --extra dev
+          uv run pytest
+
+      - name: Instala a Railway CLI
+        run: npm i -g @railway/cli
+
+      - name: Deploy
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: railway up --detach --service real-transparencia

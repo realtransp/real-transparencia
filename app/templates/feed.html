@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% from "_components.html" import avatar, cobre_button, ad_unit %}
+{% block title %}Agora · R$ Transparência{% endblock %}
+{% block content %}
+<div class="wrap wrap-wide page-head">
+  <span class="eyebrow">Câmara dos Deputados · dados abertos</span>
+  <h1 class="h1">O que tá rolando</h1>
+  <p class="lead" style="margin-top:8px;font-size:16px">Votações e tramitações mais recentes, em ordem cronológica.</p>
+</div>
+{% if pauta %}
+<div class="wrap wrap-wide" style="margin-bottom:8px">
+  <h2 class="h2" style="margin:6px 0 4px"><i data-lucide="calendar-clock" style="width:20px;height:20px;vertical-align:-3px"></i> Na pauta: próximas votações</h2>
+  <p class="muted" style="font-size:13px;margin-bottom:14px">Sessões e reuniões deliberativas já marcadas e o que está previsto para votação (agenda oficial da Câmara, ao vivo).</p>
+  <div class="pauta-grid">
+    {% for ev in pauta %}
+    <div class="pauta-card {{ 'plen' if ev.plenario }}">
+      <div class="pauta-head">
+        <div class="pauta-when"><span class="d">{{ ev.data }}</span>{% if ev.hora %}<span class="h">{{ ev.hora }}</span>{% endif %}</div>
+        <div class="pauta-org"><span class="tag {{ 'tag-plen' if ev.plenario }}">{{ ev.orgao or ev.tipo }}</span><span class="muted" style="font-size:11.5px">{{ ev.tipo }}</span></div>
+      </div>
+      <ul class="pauta-itens">
+        {% for it in ev.itens %}
+        <li><a href="https://www.camara.leg.br/propostas-legislativas/{{ it.id }}" target="_blank" rel="noopener"><span class="pi-tag">{{ it.rotulo }}</span><span class="pi-em">{{ it.ementa|truncate(90) }}</span></a></li>
+        {% endfor %}
+      </ul>
+      {% if ev.n_itens > ev.itens|length %}<div class="pauta-mais">+ {{ ev.n_itens - ev.itens|length }} outros itens na pauta</div>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<div class="wrap wrap-wide feed-layout">
+  <div class="feed-list">
+    {% for g in grupos %}
+    {% set item = g.votacoes[0] %}
+    {% if g.votacoes|length == 1 %}
+    <a class="card feed-item" href="/votacoes/{{ item.id }}">
+      <div class="icn icn-{{ item.kind }}">
+        <i data-lucide="{{ 'check' if item.kind=='aprovado' else 'x' if item.kind=='rejeitado' else 'clock' }}"></i>
+      </div>
+      <div style="flex:1">
+        <span class="eyebrow" style="text-transform:none;letter-spacing:0">{{ item.sigla_orgao }} · {{ item.data }}</span>
+        <div class="ft">{{ item.titulo }}</div>
+        <div class="meta">
+          {% if item.objeto %}<span class="tag">{{ item.objeto }}</span>{% endif %}
+          <span class="res" style="color:{{ 'var(--clay-700)' if item.kind=='rejeitado' else 'var(--green-700)' if item.kind=='aprovado' else 'var(--amber-700)' }}">{{ item.kind|capitalize }} · {{ item.sim }} a {{ item.nao }}</span>
+        </div>
+        {% if item.subtitulo or item.ementa %}<div class="sm">{{ item.subtitulo or item.descricao }}</div>{% endif %}
+      </div>
+      <i data-lucide="chevron-right" class="muted"></i>
+    </a>
+    {% else %}
+    <div class="card feed-group">
+      <div class="fg-head">
+        <div class="icn icn-{{ g.kind }}"><i data-lucide="layers"></i></div>
+        <div style="flex:1">
+          <span class="eyebrow" style="text-transform:none;letter-spacing:0">{{ g.sigla_orgao }} · {{ g.data }} · {{ g.votacoes|length }} votações</span>
+          <div class="ft">{{ g.titulo }}</div>
+          <div class="meta">{% if g.objeto %}<span class="tag">{{ g.objeto }}</span>{% endif %}{% if g.ementa %}<span class="muted" style="font-size:13px">{{ g.ementa|truncate(80) }}</span>{% endif %}</div>
+        </div>
+      </div>
+      <p class="fg-explain"><i data-lucide="info"></i> Uma proposta passa por <strong>várias votações</strong>: 2 turnos (no caso de PEC), destaques (manter ou retirar trechos), preferência e requerimentos. Cada linha é um desses votos:</p>
+      <div class="fg-list">
+        {% for v in g.votacoes %}
+        <a class="fg-item" href="/votacoes/{{ v.id }}">
+          <span class="fg-n">Votação {{ g.votacoes|length - loop.index0 }}</span>
+          <span class="fg-desc">{{ (v.descricao or 'Votação').split(' Sim:')[0].split(' Total:')[0] }}</span>
+          <span class="res" style="color:{{ 'var(--clay-700)' if v.kind=='rejeitado' else 'var(--green-700)' if v.kind=='aprovado' else 'var(--amber-700)' }};white-space:nowrap">{{ v.kind|capitalize }} · {{ v.sim }} a {{ v.nao }}</span>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+
+  <aside style="display:flex;flex-direction:column;gap:18px">
+    <div class="card side-card">
+      <h4>Mais vigiados (por gasto)</h4>
+      {% for d in vigiados %}
+      <a class="mini-dep" href="/deputados/{{ d.id }}">
+        {{ avatar(d.nome, d.url_foto, d.sigla_partido, 38) }}
+        <div>
+          <div class="mn">{{ d.nome }}</div>
+          <div class="ms">{{ d.sigla_partido }} · {{ d.sigla_uf }}</div>
+        </div>
+        <span class="val" style="color:{{ 'var(--clay-600)' if d.presence is not none and d.presence < 70 else 'var(--green-600)' }}">
+          {{ (d.presence ~ '%') if d.presence is not none else (d.total | brl) }}
+        </span>
+      </a>
+      {% endfor %}
+    </div>
+    <div class="card side-card">
+      <h4>Mais ausentes <span class="muted" style="font-weight:400;font-size:11px">· últimas 100 votações</span></h4>
+      {% for d in ausentes %}
+      <a class="mini-dep" href="/deputados/{{ d.id }}">
+        {{ avatar(d.nome, d.url_foto, d.sigla_partido, 38) }}
+        <div><div class="mn">{{ d.nome }}</div><div class="ms">{{ d.sigla_partido }} · {{ d.sigla_uf }}</div></div>
+        <span class="val" style="color:var(--clay-600)">{{ d.ausencias }} faltas</span>
+      </a>
+      {% endfor %}
+    </div>
+
+    <div class="card side-card">
+      <h4>Maiores gastos <span class="muted" style="font-weight:400;font-size:11px">· últimos 3 meses</span></h4>
+      {% for d in gastoes %}
+      <a class="mini-dep" href="/deputados/{{ d.id }}">
+        {{ avatar(d.nome, d.url_foto, d.sigla_partido, 38) }}
+        <div><div class="mn">{{ d.nome }}</div><div class="ms">{{ d.sigla_partido }} · {{ d.sigla_uf }}</div></div>
+        <span class="val" style="color:var(--clay-600)">{{ d.total | brl }}</span>
+      </a>
+      {% endfor %}
+    </div>
+
+    <div class="card side-card" style="background:var(--green-800);border:0;color:var(--ink-on-dark)">
+      <h4 style="color:#fff">Viu algo que não curtiu?</h4>
+      <p style="font-size:13.5px;color:var(--green-200);line-height:1.55;margin:0 0 14px">
+        Escolha um deputado e mande sua cobrança direto pro gabinete.
+      </p>
+      <a class="btn btn-action btn-block" href="/deputados"><i data-lucide="megaphone"></i>Cobrar deputado</a>
+    </div>
+    {{ ad_unit(adsense_slot_feed) }}
+  </aside>
+</div>
+{% endblock %}

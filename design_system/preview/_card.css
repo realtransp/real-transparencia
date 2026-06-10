@@ -1,0 +1,20 @@
+/* Shared framing for Design System preview cards.
+   Cards show specimens directly — minimal chrome. */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg-page); }
+body {
+  font-family: var(--font-sans);
+  color: var(--fg-1);
+  padding: 22px 24px;
+  -webkit-font-smoothing: antialiased;
+}
+.card-grid { display: flex; flex-direction: column; gap: 14px; }
+.row { display: flex; align-items: center; gap: 12px; }
+.row-wrap { display: flex; flex-wrap: wrap; gap: 10px; }
+.muted { color: var(--fg-3); }
+.spec-note {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--fg-3);
+}

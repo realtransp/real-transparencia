@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% from "_components.html" import month_rows, metric_strip %}
+{% block title %}{{ cat }} · Gastos · R$ Transparência{% endblock %}
+{% set meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'] %}
+{% block content %}
+<div class="wrap wrap-wide page-head">
+  <a class="eyebrow" style="color:var(--green-700)" href="/relatorio?ano={{ ano }}">← Voltar ao panorama</a>
+  <h1 class="h1" style="margin-top:10px">{{ cat }}</h1>
+  <p class="lead" style="margin-top:6px;font-size:16px">Detalhe da categoria em {{ ano }}: quanto, quantas notas e a que preço.</p>
+  <form class="filtros" method="get" style="margin-top:12px">
+    <label class="muted" style="align-self:center;font-size:13px">Ano:</label>
+    <select name="ano" onchange="this.form.submit()">
+      {% for a in anos %}<option value="{{ a }}" {{ 'selected' if a==ano }}>{{ a }}</option>{% endfor %}
+    </select>
+  </form>
+</div>
+
+<div class="wrap wrap-wide">
+  {{ metric_strip([
+      (kpis.total | brl, 'total na categoria', 'var(--clay-600)'),
+      (kpis.qtd | num, 'notas fiscais'),
+      (kpis.media | brlf, 'custo médio/nota'),
+      (kpis.n_deputados | num, 'deputados'),
+  ]) }}
+</div>
+
+<div class="wrap wrap-wide gastos-grid">
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:6px">Mês a mês ({{ ano }})</h3>
+    {{ month_rows(mensal) }}
+  </div>
+
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:6px">Maiores fornecedores</h3>
+    <table class="rank-table">
+      <thead><tr><th>Fornecedor</th><th class="num">Notas</th><th class="num">Médio</th><th class="num">Total</th></tr></thead>
+      <tbody>
+        {% for f in fornecedores %}<tr><td>{{ f.fornecedor }}</td><td class="num">{{ f.qtd | num }}</td><td class="num">{{ f.media | brl }}</td><td class="num">{{ f.total | brl }}</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if variacao %}
+<div class="wrap wrap-wide">
+  <h2 class="h2" style="margin:8px 0 6px">Mesmo fornecedor, preços diferentes</h2>
+  <p class="muted" style="font-size:13.5px;margin-bottom:12px">Fornecedores com 3+ notas nesta categoria, ordenados pela maior diferença entre a nota mais cara e a mais barata.</p>
+  <div class="card" style="overflow:hidden">
+    <table class="rank-table">
+      <thead><tr><th>Fornecedor</th><th class="num">Notas</th><th class="num">Menor</th><th class="num">Maior</th><th class="num">Diferença</th></tr></thead>
+      <tbody>
+        {% for v in variacao %}
+        <tr><td>{{ v.fornecedor }}</td><td class="num">{{ v.qtd | num }}</td><td class="num">{{ v.min | brl }}</td><td class="num">{{ v.max | brl }}</td><td class="num" style="color:var(--clay-600);font-weight:700">{{ v.amplitude | brl }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div class="wrap wrap-wide" style="padding-bottom:56px">
+  <h2 class="h2" style="margin:28px 0 12px">Maiores notas da categoria</h2>
+  <div class="card" style="overflow:hidden">
+    <table class="rec-table">
+      <thead><tr><th>Data</th><th>Deputado</th><th>Fornecedor</th><th style="text-align:right">Valor</th></tr></thead>
+      <tbody>
+        {% for r in notas %}
+        <tr>
+          <td class="data" style="font-size:12.5px;color:var(--fg-2)">{{ r.data_documento or '—' }}</td>
+          <td>{% if r.deputado %}<a href="/deputados/{{ r.deputado_id }}">{{ r.deputado }}</a>{% else %}—{% endif %}</td>
+          <td>{{ r.fornecedor_nome or '—' }}</td>
+          <td class="num" style="white-space:nowrap">{{ r.valor_liquido | brlf }}{% if r.url_documento %} <a href="{{ r.url_documento }}" target="_blank" rel="noopener" title="Abrir nota" style="color:var(--fg-link)"><i data-lucide="file-text" style="width:14px;height:14px;vertical-align:-2px"></i></a>{% endif %}</td>
+        </tr>
+        {% else %}<tr><td colspan="4" class="muted">Sem notas.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

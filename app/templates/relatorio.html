@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Raio-X{% if d.alvo_nome %} · {{ d.alvo_nome }}{% endif %} · R$ Transparência{% endblock %}
+{% block content %}
+<div class="wrap wrap-wide page-head">
+  <span class="eyebrow">Raio-X{% if d.escopo=='deputado' %} do deputado{% elif d.escopo=='partido' %} do partido{% else %} da Câmara{% endif %}</span>
+  <h1 class="h1">{% if d.escopo == 'partido' %}{{ d.alvo_nome }}{% elif d.escopo == 'deputado' %}{{ d.alvo_nome }}{% else %}Raio-X geral da Câmara{% endif %}</h1>
+  <p class="lead" style="margin-top:8px;font-size:16px">
+    {% if d.escopo == 'deputado' %}Quanto custa, se aparece pra trabalhar e a serviço de quem vota.
+    {% elif d.escopo == 'partido' %}O tamanho do bloco, a disciplina da bancada e quem se destaca dentro dela.
+    {% else %}O panorama da Câmara em {{ ano }}. Escolha um partido ou deputado para o retrato completo.{% endif %}
+  </p>
+
+  <div class="rx-filter">
+    <a class="rx-tab {{ 'on' if d.escopo=='geral' }}" href="/relatorio?escopo=geral&ano={{ ano }}">Geral</a>
+    <select class="rx-sel" onchange="if(this.value)location.href='/relatorio?escopo=partido&ano={{ ano }}&alvo='+encodeURIComponent(this.value)">
+      <option value="">Por partido…</option>
+      {% for p in lista_partidos %}<option value="{{ p }}" {{ 'selected' if d.escopo=='partido' and d.alvo==p }}>{{ p }}</option>{% endfor %}
+    </select>
+    <div class="rx-search">
+      <i data-lucide="search"></i>
+      <input class="rx-search-input" type="search" list="rx-deputados" autocomplete="off"
+             placeholder="Buscar deputado…"
+             value="{{ d.alvo_nome if d.escopo=='deputado' else '' }}"
+             data-ano="{{ ano }}"
+             oninput="rxPickDeputado(this)">
+      <datalist id="rx-deputados">
+        {% for dep in lista_deputados %}<option data-id="{{ dep.id }}" value="{{ dep.nome }} ({{ dep.sigla_partido }}-{{ dep.sigla_uf }})"></option>{% endfor %}
+      </datalist>
+    </div>
+    <select class="rx-sel" onchange="location.href='/relatorio?escopo={{ d.escopo }}{{ ('&alvo=' ~ (d.alvo|urlencode)) if d.alvo else '' }}&ano='+this.value">
+      {% for a in anos %}<option value="{{ a }}" {{ 'selected' if a==ano }}>{{ a }}</option>{% endfor %}
+    </select>
+  </div>
+</div>
+
+{% if d.escopo == 'deputado' %}{% include "_raiox_deputado.html" %}
+{% elif d.escopo == 'partido' %}{% include "_raiox_partido.html" %}
+{% else %}{% include "_raiox_geral.html" %}{% endif %}
+
+<div style="height:48px"></div>
+
+<script>
+/* Busca de deputado (datalist): ao escolher uma opção, navega para o Raio-X dele. */
+function rxPickDeputado(input) {
+  var dl = document.getElementById('rx-deputados');
+  if (!dl) return;
+  var opts = dl.options, val = input.value, id = null;
+  for (var i = 0; i < opts.length; i++) {
+    if (opts[i].value === val) { id = opts[i].getAttribute('data-id'); break; }
+  }
+  if (id) {
+    var ano = input.getAttribute('data-ano') || '';
+    location.href = '/relatorio?escopo=deputado&alvo=' + encodeURIComponent(id) + (ano ? '&ano=' + ano : '');
+  }
+}
+</script>
+{% endblock %}

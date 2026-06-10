@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% from "_components.html" import month_rows, metric_strip %}
+{% block title %}Raio-X {{ sigla }} · R$ Transparência{% endblock %}
+{% block content %}
+<div class="wrap wrap-wide page-head">
+  <a class="eyebrow" style="color:var(--green-700)" href="/relatorio?ano={{ ano }}{{ ('&mes=' ~ mes) if mes else '' }}">← Voltar ao Raio-X</a>
+  <h1 class="h1" style="margin-top:10px">Raio-X do {{ sigla }}</h1>
+  <p class="lead" style="margin-top:6px;font-size:16px">Gastos da bancada do {{ sigla }} em {{ ano }}{% if mes %} (mês {{ mes }}){% endif %}.</p>
+  <form class="filtros" method="get" style="margin-top:12px">
+    <select name="ano" onchange="this.form.submit()">
+      {% for a in anos %}<option value="{{ a }}" {{ 'selected' if a==ano }}>{{ a }}</option>{% endfor %}
+    </select>
+    <select name="mes" onchange="this.form.submit()">
+      <option value="">Ano todo</option>
+      {% set mn = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'] %}
+      {% for i in range(1,13) %}<option value="{{ i }}" {{ 'selected' if i==mes }}>{{ mn[i-1] }}</option>{% endfor %}
+    </select>
+  </form>
+</div>
+
+<div class="wrap wrap-wide">
+  {{ metric_strip([
+      (kpis.total | brl, 'gasto da bancada', 'var(--clay-600)'),
+      (kpis.deputados | num, 'deputados'),
+      (kpis.media_dep | brl, 'média por deputado'),
+      (kpis.qtd | num, 'notas fiscais'),
+  ]) }}
+</div>
+
+<div class="wrap wrap-wide gastos-grid">
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:6px">Mês a mês ({{ ano }})</h3>
+    {{ month_rows(mensal) }}
+  </div>
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:6px">Por categoria</h3>
+    {% set maxc = categorias[0].total if categorias else 1 %}
+    {% for c in categorias %}
+    <div class="cat-row">
+      <div class="cat-label"><span class="sq" style="background:var(--viz-{{ (loop.index0 % 6) + 1 }})"></span>{{ c.categoria }}</div>
+      <div class="data" style="font-size:13.5px">{{ c.total | brl }}</div>
+      <div class="cat-track"><div class="fill" style="width:{{ ((c.total / maxc) * 100)|round|int }}%;background:var(--viz-{{ (loop.index0 % 6) + 1 }})"></div></div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="wrap wrap-wide" style="padding-bottom:56px">
+  <h2 class="h2" style="margin:8px 0 12px">Quem mais gasta no {{ sigla }}</h2>
+  <div class="card" style="overflow:hidden">
+    <table class="rank-table">
+      <thead><tr><th class="rk">#</th><th>Deputado</th><th>UF</th><th class="num">Total gasto</th></tr></thead>
+      <tbody>
+        {% for d in deputados %}
+        <tr><td class="rk">{{ loop.index }}</td><td><a href="/deputados/{{ d.id }}">{{ d.nome }}</a></td><td class="muted">{{ d.sigla_uf }}</td><td class="num">{{ d.total | brl }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

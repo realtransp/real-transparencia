@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_card.css">
+<style>
+  body { background: var(--green-800); padding: 0; }
+  .dark {
+    background: var(--green-800); padding: 26px 24px;
+    display: flex; align-items: center; gap: 28px;
+    background-image: radial-gradient(circle at 1px 1px, rgba(242,236,220,0.06) 1px, transparent 0);
+    background-size: 14px 14px;
+  }
+  .mark {
+    width: 52px; height: 52px; border-radius: var(--radius-md);
+    background: var(--amber-500);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-serif); font-weight: 600; font-size: 24px;
+    color: var(--green-900); letter-spacing: -0.03em; flex: none;
+  }
+  .wm {
+    font-family: var(--font-serif); font-weight: 600; font-size: 32px;
+    letter-spacing: -0.02em; color: var(--ink-on-dark); line-height: 1;
+  }
+  .wm .reais { color: var(--amber-400); font-weight: 700; }
+  .tag {
+    font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--green-300); margin-top: 6px;
+  }
+</style>
+</head>
+<body>
+  <div class="dark">
+    <div class="mark">R$</div>
+    <div>
+      <div class="wm"><span class="reais">R$</span> Transparência</div>
+      <div class="tag">Versão sobre fundo escuro · pinheiro</div>
+    </div>
+  </div>
+</body>
+</html>

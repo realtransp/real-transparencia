@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Eleições · R$ Transparência{% endblock %}
+{% block content %}
+<div class="wrap wrap-wide page-head">
+  <span class="eyebrow">Tribunal Superior Eleitoral · dados abertos</span>
+  <h1 class="h1">Eleições</h1>
+  <p class="lead" style="margin-top:8px;font-size:16px">Quem se elegeu deputado federal, a partir dos dados do TSE.</p>
+</div>
+<div class="wrap wrap-wide" style="padding-bottom:64px">
+  {% if not anos %}
+  <div class="card card-pad muted">Sem dados do TSE ainda. Rode: <code>uv run python -m app.ingest backfill --de 2022 --ate 2022</code>.</div>
+  {% else %}
+  <form class="filtros" method="get">
+    <select name="ano" onchange="this.form.submit()">
+      {% for a in anos %}<option value="{{ a }}" {{ 'selected' if a==ano }}>{{ a }}</option>{% endfor %}
+    </select>
+  </form>
+  <div class="card" style="overflow:hidden">
+    <table class="rank-table">
+      <thead><tr><th>Candidato</th><th>Partido</th><th>UF</th><th>Situação</th></tr></thead>
+      <tbody>
+        {% for c in eleitos %}
+        <tr><td style="font-weight:600">{{ c.nome }}</td><td>{{ c.sigla_partido }}</td><td class="muted">{{ c.sigla_uf }}</td><td><span class="tag">{{ c.situacao }}</span></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

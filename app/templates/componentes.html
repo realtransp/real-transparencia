@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% from "_components.html" import avatar, party_tag, vote_badge, cobre_button %}
+{% block title %}Design System · R$ Transparência{% endblock %}
+{% set demo = {'id': 0, 'nome': 'Carla Medeiros', 'sigla_partido': 'PT', 'sigla_uf': 'SP', 'email': 'dep.carla@camara.leg.br', 'url_foto': None, 'presence': 91} %}
+{% block content %}
+<div class="wrap wrap-narrow page-head">
+  <span class="eyebrow">Documentação</span>
+  <h1 class="h1">Design System</h1>
+  <p class="lead" style="margin-top:8px;font-size:16px">Todos os componentes, tokens e padrões do portal R$ Transparência, ao vivo.</p>
+</div>
+
+<div class="wrap wrap-narrow">
+
+  <!-- CORES -->
+  <section class="sg-section">
+    <h2 class="h2">Cores</h2>
+    <div class="sg-label">Marca · pinheiro</div>
+    <div class="sg-row">
+      {% for c in ['--green-900','--green-800','--green-700','--green-600','--green-500','--green-300','--green-100'] %}
+      <div class="sg-swatch"><div class="chip-c" style="background:var({{ c }})"></div><span class="nm">{{ c }}</span></div>{% endfor %}
+    </div>
+    <div class="sg-label">Acento · amber / ação · clay / info · petróleo</div>
+    <div class="sg-row">
+      {% for c in ['--amber-500','--amber-400','--clay-600','--clay-500','--petro-600','--petro-500','--ochre-600'] %}
+      <div class="sg-swatch"><div class="chip-c" style="background:var({{ c }})"></div><span class="nm">{{ c }}</span></div>{% endfor %}
+    </div>
+    <div class="sg-label">Papel & tinta</div>
+    <div class="sg-row">
+      {% for c in ['--paper-0','--paper-1','--paper-2','--paper-3','--ink-1','--ink-2','--ink-3'] %}
+      <div class="sg-swatch"><div class="chip-c" style="background:var({{ c }})"></div><span class="nm">{{ c }}</span></div>{% endfor %}
+    </div>
+  </section>
+
+  <!-- TIPOGRAFIA -->
+  <section class="sg-section">
+    <h2 class="h2">Tipografia</h2>
+    <p class="muted" style="font-size:13px">Serif (IBM Plex Serif) p/ títulos · Sans p/ UI · Mono p/ dados.</p>
+    <div style="margin-top:14px;display:flex;flex-direction:column;gap:6px">
+      <div class="t-display-1">Display 1</div>
+      <div class="t-h1">Heading 1: serif</div>
+      <div class="t-h2">Heading 2: serif</div>
+      <div class="t-h3">Heading 3: sans</div>
+      <div class="t-body-lg">Body large: texto de leitura confortável.</div>
+      <div class="t-body">Body: corpo padrão do portal.</div>
+      <div class="t-small">Small: apoio e legendas.</div>
+      <div class="t-label">Label · mono eyebrow</div>
+      <div class="t-data" style="font-size:22px">R$ 1.234.567,89</div>
+    </div>
+  </section>
+
+  <!-- BOTÕES -->
+  <section class="sg-section">
+    <h2 class="h2">Botões</h2>
+    <div class="sg-row">
+      <button class="btn btn-primary"><i data-lucide="vote"></i>Primary</button>
+      <button class="btn btn-action"><i data-lucide="megaphone"></i>Ação (cobre)</button>
+      <button class="btn btn-amber"><i data-lucide="search"></i>Amber</button>
+      <button class="btn btn-secondary"><i data-lucide="receipt"></i>Secondary</button>
+      <button class="btn btn-ghost">Ghost <i data-lucide="arrow-right"></i></button>
+    </div>
+    <div class="sg-row">
+      <button class="btn btn-primary btn-sm">Small</button>
+      <button class="btn btn-primary">Default</button>
+      <button class="btn btn-primary btn-lg">Large</button>
+    </div>
+  </section>
+
+  <!-- TAGS / BADGES -->
+  <section class="sg-section">
+    <h2 class="h2">Tags & Badges</h2>
+    <div class="sg-row">
+      {{ party_tag('PT','SP') }}
+      {{ party_tag('PL','RJ','3º mandato') }}
+      <span class="tag">PL 2338/2023</span>
+      <span class="eyebrow">Eyebrow · mono</span>
+    </div>
+    <div class="sg-label">Voto</div>
+    <div class="sg-row">
+      {{ vote_badge('sim') }}{{ vote_badge('nao') }}{{ vote_badge('abs') }}{{ vote_badge('aus') }}
+    </div>
+    <div class="sg-label">Status (tramitação)</div>
+    <div class="sg-row">
+      <span class="badge" style="background:var(--status-aprovado-bg);color:var(--green-700);padding:3px 10px;border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:11px">aprovado</span>
+      <span class="badge" style="background:var(--status-rejeitado-bg);color:var(--clay-700);padding:3px 10px;border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:11px">rejeitado</span>
+      <span class="badge" style="background:var(--status-tramitando-bg);color:var(--amber-700);padding:3px 10px;border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:11px">tramitando</span>
+    </div>
+  </section>
+
+  <!-- AVATAR -->
+  <section class="sg-section">
+    <h2 class="h2">Avatar</h2>
+    <p class="muted" style="font-size:13px">Foto real quando disponível; senão monograma tingido por partido.</p>
+    <div class="sg-row">
+      {{ avatar('Carla Medeiros', None, 'PT', 64) }}
+      {{ avatar('Rui Alencar', None, 'PL', 64) }}
+      {{ avatar('Beatriz Nunes', None, 'PSDB', 64) }}
+      {{ avatar('João Peixoto', None, 'MDB', 64) }}
+      {{ avatar('Com foto', 'https://www.camara.leg.br/internet/deputado/bandep/74848.jpg', 'PT', 64) }}
+    </div>
+  </section>
+
+  <!-- CARDS / STAT -->
+  <section class="sg-section">
+    <h2 class="h2">Cards & Stat cards</h2>
+    <div class="cards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:14px">
+      <div class="card card-pad"><span class="eyebrow">Total gasto</span><div class="data" style="font-size:32px;color:var(--clay-600);margin:8px 0 2px">R$ 252 mi</div><span class="muted" style="font-size:12.5px">2024</span></div>
+      <div class="card card-pad"><span class="eyebrow">Presença</span><div class="data" style="font-size:32px;margin:8px 0 2px">72,7%</div><span class="muted" style="font-size:12.5px">80 de 110 sessões</span></div>
+      <div class="card card-pad"><span class="eyebrow">Salário</span><div class="data" style="font-size:32px;margin:8px 0 2px">R$ 46k</div><span class="muted" style="font-size:12.5px">subsídio fixo</span></div>
+    </div>
+  </section>
+
+  <!-- FEED ITEM -->
+  <section class="sg-section">
+    <h2 class="h2">Feed item</h2>
+    <div class="feed-list" style="margin-top:14px">
+      <div class="card feed-item">
+        <div class="icn icn-aprovado"><i data-lucide="check"></i></div>
+        <div style="flex:1">
+          <span class="eyebrow" style="text-transform:none;letter-spacing:0">PLEN · 2024-05-28</span>
+          <div class="ft">Aprovado o marco legal da inteligência artificial</div>
+          <div class="meta"><span class="tag">PL 2338/2023</span><span class="res" style="color:var(--green-700)">312 a 138</span></div>
+        </div>
+        <i data-lucide="chevron-right" class="muted"></i>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAT ROW / PARTY ROW / TALLY -->
+  <section class="sg-section">
+    <h2 class="h2">Barras de dados</h2>
+    <div class="sg-label">Categoria (cat-row)</div>
+    <div class="card card-pad" style="margin-top:8px">
+      <div class="cat-row"><div class="cat-label"><span class="sq" style="background:var(--viz-1)"></span>Passagens aéreas</div><div class="data" style="font-size:13.5px">R$ 64.120,00</div><div class="cat-track"><div class="fill" style="width:100%;background:var(--viz-1)"></div></div></div>
+      <div class="cat-row"><div class="cat-label"><span class="sq" style="background:var(--viz-2)"></span>Combustível</div><div class="data" style="font-size:13.5px">R$ 38.905,00</div><div class="cat-track"><div class="fill" style="width:60%;background:var(--viz-2)"></div></div></div>
+    </div>
+    <div class="sg-label">Placar (tally)</div>
+    <div class="tally-bar" style="margin-top:8px">
+      <div class="seg" style="width:67%;background:var(--green-600)"></div>
+      <div class="seg" style="width:30%;background:var(--clay-600)"></div>
+      <div class="seg" style="width:3%;background:var(--ink-3)"></div>
+    </div>
+    <div class="sg-label">Recorte por partido (party-row)</div>
+    <div class="card card-pad" style="margin-top:8px">
+      <div class="party-row"><span class="tag" style="justify-content:center">PT</span><div><div class="party-bar"><div class="pf" style="width:97%"></div><div class="pa" style="width:3%"></div></div></div></div>
+      <div class="party-row"><span class="tag" style="justify-content:center">PL</span><div><div class="party-bar"><div class="pf" style="width:19%"></div><div class="pa" style="width:81%"></div></div></div></div>
+    </div>
+  </section>
+
+  <!-- COBRE -->
+  <section class="sg-section">
+    <h2 class="h2">Cobre seu deputado</h2>
+    <p class="muted" style="font-size:13px">Modal reutilizável: e-mail oficial do gabinete → modelo → mensagem editável → envio (mailto).</p>
+    <div class="sg-row">{{ cobre_button(demo, label='Abrir o fluxo Cobrar') }}</div>
+  </section>
+
+</div>
+{% endblock %}

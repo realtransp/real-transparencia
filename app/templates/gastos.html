@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% from "_components.html" import month_rows, metric_strip %}
+{% block title %}Gastos da Câmara · R$ Transparência{% endblock %}
+{% block og_title %}Gastos da Câmara: para onde vai a cota parlamentar{% endblock %}
+{% set mn = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'] %}
+{% block content %}
+<div class="wrap wrap-wide page-head">
+  <span class="eyebrow">Cota parlamentar (CEAP) · raio-x do dinheiro</span>
+  <h1 class="h1">Gastos da Câmara</h1>
+  <p class="lead" style="margin-top:8px;font-size:16px">Para onde foi a cota e <strong>quem recebeu</strong>: fornecedores, partidos, deputados, com os pontos que merecem um olhar mais atento.</p>
+  <form class="filtros" method="get" style="margin-top:12px">
+    <select name="ano" onchange="this.form.submit()">
+      {% for a in anos %}<option value="{{ a }}" {{ 'selected' if a==ano }}>{{ a }}</option>{% endfor %}
+    </select>
+    <select name="mes" onchange="this.form.submit()">
+      <option value="">Ano todo</option>
+      {% for i in range(1,13) %}<option value="{{ i }}" {{ 'selected' if i==mes }}>{{ mn[i-1] }}</option>{% endfor %}
+    </select>
+  </form>
+</div>
+
+<div class="wrap wrap-wide">
+  {{ metric_strip([
+      (kpis.total | brl, 'gasto' ~ ((' · ' ~ mn[mes-1]) if mes else '') ~ ' ' ~ ano, 'var(--clay-600)'),
+      (overview.n_forn | num, 'fornecedores'),
+      (kpis.qtd | num, 'notas fiscais'),
+      (overview.ticket | brl, 'ticket médio'),
+      ((overview.top10_pct ~ '%'), 'nos 10 maiores fornec.'),
+  ]) }}
+</div>
+
+<!-- PONTOS DE ATENÇÃO -->
+<div class="wrap wrap-wide">
+  <h2 class="h2" style="margin:14px 0 4px">Pontos de atenção</h2>
+  <p class="muted" style="font-size:13px;margin-bottom:14px;max-width:760px">
+    Indicadores estatísticos sobre dados públicos da Câmara. Concentração, repetição ou
+    exclusividade <strong>não significam irregularidade</strong>, apontam onde a fiscalização
+    cidadã pode olhar com mais cuidado.
+  </p>
+  <div class="aten-grid">
+    <a class="aten-card" href="#fornecedores">
+      <div class="av">{{ overview.top10_pct }}%</div>
+      <div class="al">do gasto vai para apenas <strong>10 fornecedores</strong></div>
+    </a>
+    <a class="aten-card" href="#exclusivos">
+      <div class="av">{{ exclusivos|length }}{{ '+' if exclusivos|length >= 15 }}</div>
+      <div class="al">fornecedores que receberam de <strong>um único deputado</strong></div>
+    </a>
+    <a class="aten-card" href="#repetidos">
+      <div class="av">{{ repetidos|length }}{{ '+' if repetidos|length >= 15 }}</div>
+      <div class="al">casos de <strong>valor idêntico repetido</strong> muitas vezes</div>
+    </a>
+    <a class="aten-card" href="#pf">
+      <div class="av">{{ overview.pf_pct }}%</div>
+      <div class="al">pago a <strong>pessoas físicas</strong> (CPF), não empresas</div>
+    </a>
+  </div>
+</div>
+
+<!-- MAIORES FORNECEDORES -->
+<div class="wrap wrap-wide" id="fornecedores">
+  <h2 class="h2" style="margin:24px 0 4px">Quem mais recebeu: fornecedores</h2>
+  <p class="muted" style="font-size:13px;margin-bottom:12px">Maiores fornecedores em {{ ano }}, de quantos deputados e partidos receberam, o partido que mais pagou e o maior pagador individual.</p>
+  <div class="card card-pad">
+    <div class="table-scroll">
+    <table class="rank-table">
+      <thead><tr>
+        <th class="rk">#</th><th>Fornecedor</th><th class="num">Total</th><th class="num">Notas</th>
+        <th class="num">Deps</th><th class="num">Partidos</th><th>Partido que + pagou</th><th>Maior pagador</th>
+      </tr></thead>
+      <tbody>{% for f in fornecedores %}
+        <tr>
+          <td class="rk">{{ loop.index }}</td>
+          <td><a href="/fornecedor?nome={{ f.nome|urlencode }}&ano={{ ano }}">{{ f.nome }}</a>{% if f.doc and f.doc|length == 11 %} <span class="tag tag-pf" title="Documento de pessoa física (CPF)">PF</span>{% endif %}</td>
+          <td class="num">{{ f.total | brl }}</td>
+          <td class="num">{{ f.qtd | num }}</td>
+          <td class="num">{{ f.n_dep }}</td>
+          <td class="num">{{ f.n_part }}</td>
+          <td>{% if f.partido_top %}<a href="/relatorio?escopo=partido&alvo={{ f.partido_top|urlencode }}&ano={{ ano }}">{{ f.partido_top }}</a> <span class="muted" style="font-size:11px">{{ f.partido_top_pct|int }}%</span>{% else %}—{% endif %}</td>
+          <td>{% if f.dep_top %}<a href="/deputados/{{ f.dep_top.did }}">{{ f.dep_top.dn }}</a> <span class="muted" style="font-size:11px">{{ f.dep_top.dp }}-{{ f.dep_top.du }}</span>{% else %}—{% endif %}</td>
+        </tr>
+      {% endfor %}</tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- FORNECEDORES EXCLUSIVOS -->
+<div class="wrap wrap-wide gastos-grid" style="margin-top:8px">
+  <div class="card card-pad" id="exclusivos">
+    <h3 class="h3" style="margin-bottom:4px">Fornecedores de um único deputado</h3>
+    <p class="muted" style="font-size:12px;margin-bottom:12px">Empresas/pessoas cujo faturamento da cota em {{ ano }} veio de <strong>um só</strong> deputado.</p>
+    <table class="rank-table">
+      <thead><tr><th>Fornecedor</th><th class="num">Total</th><th>Deputado</th></tr></thead>
+      <tbody>{% for f in exclusivos %}
+        <tr>
+          <td><a href="/fornecedor?nome={{ f.nome|urlencode }}&ano={{ ano }}">{{ f.nome }}</a></td>
+          <td class="num">{{ f.total | brl }}</td>
+          <td><a href="/deputados/{{ f.dep_id }}">{{ f.dep }}</a> <span class="muted" style="font-size:11px">{{ f.part }}-{{ f.uf }}</span></td>
+        </tr>
+      {% else %}<tr><td colspan="3" class="muted">—</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+  <div class="card card-pad" id="repetidos">
+    <h3 class="h3" style="margin-bottom:4px">Mesmo valor, muitas vezes</h3>
+    <p class="muted" style="font-size:12px;margin-bottom:12px">Um deputado pagando ao mesmo fornecedor o <strong>valor exato</strong>, repetidamente em {{ ano }} (acima do mensal).</p>
+    <table class="rank-table">
+      <thead><tr><th>Deputado → fornecedor</th><th class="num">Valor</th><th class="num">Vezes</th></tr></thead>
+      <tbody>{% for r in repetidos %}
+        <tr>
+          <td><a href="/deputados/{{ r.dep_id }}">{{ r.dep }}</a> <span class="muted" style="font-size:11px">→ {{ r.nome|truncate(26) }}</span></td>
+          <td class="num">{{ r.valor | brl }}</td>
+          <td class="num">{{ r.vezes }}×</td>
+        </tr>
+      {% else %}<tr><td colspan="3" class="muted">—</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PESSOA FÍSICA -->
+{% if pf %}
+<div class="wrap wrap-wide" id="pf">
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:4px">Maiores pagamentos a pessoas físicas</h3>
+    <p class="muted" style="font-size:12px;margin-bottom:12px">Recebimentos por CPF (não empresa) em {{ ano }}: ex.: serviços de divulgação, consultoria, locação.</p>
+    <div class="table-scroll">
+    <table class="rank-table">
+      <thead><tr><th class="rk">#</th><th>Pessoa</th><th class="num">Total</th><th class="num">Notas</th><th class="num">Deputados</th></tr></thead>
+      <tbody>{% for r in pf %}
+        <tr><td class="rk">{{ loop.index }}</td><td><a href="/fornecedor?nome={{ r.nome|urlencode }}&ano={{ ano }}">{{ r.nome }}</a></td><td class="num">{{ r.total | brl }}</td><td class="num">{{ r.qtd | num }}</td><td class="num">{{ r.n_dep }}</td></tr>
+      {% endfor %}</tbody>
+    </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- CATEGORIA / PARTIDO / MÊS -->
+<div class="wrap wrap-wide gastos-grid" style="margin-top:8px">
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:6px">Mês a mês ({{ ano }})</h3>
+    {{ month_rows(mensal) }}
+  </div>
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:10px">Gasto por categoria <span class="muted" style="font-size:12px;font-weight:400">· clique p/ as notas</span></h3>
+    {% set maxc = categorias[0].total if categorias else 1 %}
+    {% for c in categorias[:10] %}
+    <a class="cat-row cat-link" href="/relatorio/categoria/{{ c.categoria|urlencode }}?ano={{ ano }}{{ ('&mes=' ~ mes) if mes else '' }}">
+      <div class="cat-label"><span class="sq" style="background:var(--viz-{{ (loop.index0 % 6)+1 }})"></span>{{ c.categoria }}</div>
+      <div class="data" style="font-size:13.5px">{{ c.total | brl }}</div>
+      <div class="cat-track"><div class="fill" style="width:{{ ((c.total/maxc)*100)|round|int }}%;background:var(--viz-{{ (loop.index0 % 6)+1 }})"></div></div>
+    </a>
+    {% else %}<p class="muted">Sem gastos no período.</p>{% endfor %}
+  </div>
+</div>
+
+<div class="wrap wrap-wide gastos-grid">
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:10px">Gasto por partido <span class="muted" style="font-size:12px;font-weight:400">· clique p/ raio-x</span></h3>
+    <table class="rank-table">
+      <thead><tr><th>Partido</th><th class="num">Deps</th><th class="num">Média/dep</th><th class="num">Total</th></tr></thead>
+      <tbody>{% for p in partidos[:14] %}<tr><td><a href="/relatorio?escopo=partido&alvo={{ p.partido|urlencode }}&ano={{ ano }}">{{ p.partido }}</a></td><td class="num">{{ p.deputados }}</td><td class="num">{{ p.media_dep | brl }}</td><td class="num">{{ p.total | brl }}</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:10px">Quem mais gastou</h3>
+    <table class="rank-table">
+      <thead><tr><th class="rk">#</th><th>Deputado</th><th class="num">Total</th></tr></thead>
+      <tbody>{% for r in ranking %}<tr><td class="rk">{{ loop.index }}</td><td><a href="/deputados/{{ r.id }}/gastos">{{ r.nome }}</a> <span class="muted" style="font-size:11px">{{ r.sigla_partido }}-{{ r.sigla_uf }}</span></td><td class="num">{{ r.total | brl }}</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+</div>
+
+<div class="wrap wrap-wide" style="padding-bottom:56px">
+  <h2 class="h2" style="margin:8px 0 12px">Maiores notas de {{ ano }}{% if mes %} · {{ mn[mes-1] }}{% endif %}</h2>
+  <div class="card" style="overflow:hidden">
+    <div class="table-scroll">
+    <table class="rec-table">
+      <thead><tr><th>Data</th><th>Deputado</th><th>Categoria</th><th>Fornecedor</th><th style="text-align:right">Valor</th></tr></thead>
+      <tbody>
+        {% for r in maiores %}
+        <tr>
+          <td class="data" style="font-size:12.5px;color:var(--fg-2)">{{ r.data_documento or '—' }}</td>
+          <td>{% if r.deputado %}<a href="/deputados/{{ r.deputado_id }}">{{ r.deputado }}</a>{% else %}—{% endif %}</td>
+          <td><span class="tag">{{ r.tipo_despesa }}</span></td>
+          <td>{{ r.fornecedor_nome or '—' }}</td>
+          <td class="num" style="white-space:nowrap">{{ r.valor_liquido | brlf }}{% if r.url_documento %} <a href="{{ r.url_documento }}" target="_blank" rel="noopener" title="Abrir nota"><i data-lucide="file-text" style="width:14px;height:14px;vertical-align:-2px"></i></a>{% endif %}</td>
+        </tr>
+        {% else %}<tr><td colspan="5" class="muted">Sem notas.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

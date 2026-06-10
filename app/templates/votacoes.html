@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Votações · R$ Transparência{% endblock %}
+{% block content %}
+<div class="wrap wrap-wide page-head">
+  <span class="eyebrow">Câmara dos Deputados</span>
+  <h1 class="h1">Votações</h1>
+  <p class="lead" style="margin-top:8px;font-size:16px">Como a Câmara decidiu, com o placar de cada votação. Filtre por mês.</p>
+  <form class="filtros" method="get" style="margin-top:12px">
+    <select name="ano" onchange="this.form.submit()">
+      <option value="">Todos os anos</option>
+      {% for a in anos %}<option value="{{ a }}" {{ 'selected' if a==ano }}>{{ a }}</option>{% endfor %}
+    </select>
+    <select name="mes" onchange="this.form.submit()">
+      <option value="">Todos os meses</option>
+      {% set mn = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'] %}
+      {% for i in range(1,13) %}<option value="{{ i }}" {{ 'selected' if i==mes }}>{{ mn[i-1] }}</option>{% endfor %}
+    </select>
+  </form>
+</div>
+<div class="wrap wrap-wide" style="padding:8px 0 64px">
+  <div class="feed-list">
+    {% for item in feed %}
+    <a class="card feed-item" href="/votacoes/{{ item.id }}">
+      <div class="icn icn-{{ item.kind }}">
+        <i data-lucide="{{ 'check' if item.kind=='aprovado' else 'x' if item.kind=='rejeitado' else 'clock' }}"></i>
+      </div>
+      <div style="flex:1">
+        <span class="eyebrow" style="text-transform:none;letter-spacing:0">{{ item.sigla_orgao }} · {{ item.data }}</span>
+        <div class="ft">{{ item.titulo }}</div>
+        <div class="meta">
+          {% if item.objeto %}<span class="tag">{{ item.objeto }}</span>{% endif %}
+          <span class="res" style="color:{{ 'var(--clay-700)' if item.kind=='rejeitado' else 'var(--green-700)' if item.kind=='aprovado' else 'var(--amber-700)' }}">{{ item.kind|capitalize }} · {{ item.sim }} a {{ item.nao }}</span>
+        </div>
+        {% if item.subtitulo or item.ementa %}<div class="sm">{{ item.subtitulo or item.descricao }}</div>{% endif %}
+      </div>
+      <i data-lucide="chevron-right" class="muted"></i>
+    </a>
+    {% else %}<p class="muted">Sem votações registradas.</p>{% endfor %}
+  </div>
+</div>
+{% endblock %}

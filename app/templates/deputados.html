@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% from "_components.html" import avatar, party_tag, cobre_button %}
+{% block title %}Deputados · R$ Transparência{% endblock %}
+{% block content %}
+<div class="wrap wrap-wide page-head">
+  <span class="eyebrow">Câmara dos Deputados</span>
+  <h1 class="h1">Deputados</h1>
+  <p class="lead" style="margin-top:8px;font-size:16px">Busque, filtre e abra o perfil de cada parlamentar.</p>
+</div>
+<div class="wrap wrap-wide">
+  <form class="filtros" method="get">
+    <input type="text" name="busca" value="{{ busca }}" placeholder="Buscar por nome…">
+    <select name="uf"><option value="">UF</option>
+      {% for u in filtros.ufs %}<option value="{{ u }}" {{ 'selected' if u==uf }}>{{ u }}</option>{% endfor %}</select>
+    <select name="partido"><option value="">Partido</option>
+      {% for p in filtros.partidos %}<option value="{{ p }}" {{ 'selected' if p==partido }}>{{ p }}</option>{% endfor %}</select>
+    <button class="btn btn-primary btn-sm" type="submit">Buscar</button>
+  </form>
+
+  <div class="dep-grid">
+    {% for d in deputados %}
+    <div class="card dep-card-full">
+      <div class="dep-card-top">
+        {{ avatar(d.nome, d.url_foto, d.sigla_partido, 52) }}
+        <div style="flex:1;min-width:0">
+          <div class="dep-card-nm">{{ d.nome }}</div>
+          {{ party_tag(d.sigla_partido, d.sigla_uf) }}
+        </div>
+      </div>
+      <div class="dep-card-stats">
+        <div class="dep-card-stat">
+          <div class="dep-card-v {{ 'dep-card-low' if d.pct_presenca is not none and d.pct_presenca < 70 }}">{{ (d.pct_presenca | round | int ~ '%') if d.pct_presenca is not none else '—' }}</div>
+          <div class="dep-card-l">Presença</div>
+        </div>
+        <div class="dep-card-stat">
+          <div class="dep-card-v">{{ d.cota_total | brl }}</div>
+          <div class="dep-card-l">Cota {{ 'gasta' }}</div>
+        </div>
+      </div>
+      <div class="dep-card-foot">
+        <a class="dep-card-mini dep-card-prim" href="/deputados/{{ d.id }}"><i data-lucide="bar-chart-3"></i>Atividade</a>
+        {% if d.email or d.telefone %}
+        {{ cobre_button(d, 'Cobrar', 'dep-card-mini dep-card-act', 'megaphone') }}
+        {% else %}
+        <a class="dep-card-mini dep-card-act" href="/deputados/{{ d.id }}"><i data-lucide="megaphone"></i>Cobrar</a>
+        {% endif %}
+      </div>
+    </div>
+    {% else %}
+    <p class="muted">Nenhum deputado encontrado.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Sugestões · R$ Transparência{% endblock %}
+{% block content %}
+<div class="wrap wrap-narrow page-head">
+  <span class="eyebrow">Voz de quem usa</span>
+  <h1 class="h1">Sugestões</h1>
+  <p class="lead" style="margin-top:8px;font-size:16px">O que as pessoas mandaram para melhorar o R$ Transparência. Tudo <strong>anônimo</strong>, sem nome nem dado pessoal.</p>
+</div>
+
+<div class="wrap wrap-narrow" style="padding-bottom:56px">
+  <p class="muted" style="font-size:13px;margin-bottom:16px">{{ lista|length }} sugestão{{ 'ões' if lista|length != 1 else '' }} recebida{{ 's' if lista|length != 1 else '' }}.</p>
+  <div class="sug-list">
+    {% for s in lista %}
+    <div class="sug-item">
+      <p class="sug-text">{{ s.texto }}</p>
+      <div class="sug-meta">
+        <span>{{ (s.criado_em|string)[:16] }}</span>
+        {% if s.pagina %}<span class="muted">· em <a href="{{ s.pagina }}">{{ s.pagina }}</a></span>{% endif %}
+      </div>
+    </div>
+    {% else %}
+    <p class="muted">Ainda não há sugestões. Use o balão no canto da tela para deixar a primeira.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

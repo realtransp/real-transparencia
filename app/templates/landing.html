@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}R$ Transparência: para onde vai o seu dinheiro na Câmara{% endblock %}
+{% block content %}
+
+<!-- HERO -->
+<section class="lp-hero">
+  <div class="wrap wrap-wide lp-hero-in">
+    <span class="eyebrow" style="color:var(--green-300)">Câmara dos Deputados · dados abertos, em português claro</span>
+    <h1 class="lp-h1">Seu deputado<br><span class="em">trabalha pra você?</span></h1>
+    <p class="lp-sub">
+      Votos, gastos da cota e presença dos 513 deputados, em português claro.
+      E quando não gostar, <strong>cobre seu deputado</strong> em 30 segundos.
+    </p>
+    <form class="hero-search" action="/deputados" method="get" autocomplete="off">
+      <div class="field" id="busca-field">
+        <i data-lucide="search"></i>
+        <input name="busca" placeholder="Digite um nome, partido ou estado…"
+               hx-get="/buscar" hx-trigger="keyup changed delay:180ms, focus"
+               hx-target="#busca-result" hx-swap="innerHTML">
+        <div id="busca-result" class="bs-wrap"></div>
+      </div>
+      <button class="btn btn-amber btn-lg" type="submit">Buscar</button>
+    </form>
+    <script>
+    document.addEventListener('click', function(e){
+      var f = document.getElementById('busca-field'), r = document.getElementById('busca-result');
+      if (f && r && !f.contains(e.target)) r.innerHTML = '';
+    });
+    </script>
+
+    <!-- escala humana -->
+    <div class="lp-cost">
+      <i data-lucide="wallet"></i>
+      <p>Cada deputado custa cerca de <strong>{{ custo.por_dep | brl }} por mês</strong> (salário fixo mais o teto da cota). Juntos, os 513 passam de <strong>{{ custo.total_mes | brl }} por mês</strong> do seu bolso.</p>
+    </div>
+  </div>
+</section>
+
+<!-- COMECE PELO SEU ESTADO -->
+<section class="section lp-states">
+  <div class="wrap wrap-wide">
+    <div class="section-head" style="margin-bottom:16px">
+      <span class="eyebrow">Comece por você</span>
+      <h2 class="h2">Quem representa o seu estado?</h2>
+      <p>Toque no seu estado e veja os deputados que você ajudou a eleger.</p>
+    </div>
+    <div class="uf-grid">
+      {% for uf in ufs %}
+      <a class="uf-chip" href="/deputados?uf={{ uf }}">{{ uf }}</a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- DESTAQUE DA SEMANA -->
+{% if destaque %}
+{% set item = destaque.votacoes[0] %}
+{% set multi = destaque.votacoes|length > 1 %}
+<section class="section">
+  <div class="wrap wrap-wide">
+    <div class="section-head" style="margin-bottom:16px">
+      <span class="eyebrow">Em destaque</span>
+      <h2 class="h2">A votação que mexe com você</h2>
+    </div>
+    <a class="lp-destaque rb-{{ destaque.kind }}" href="/votacoes/{{ item.id }}">
+      <div class="lp-dest-tag">
+        <span class="badge-res badge-{{ destaque.kind }}">
+          <i data-lucide="{{ 'check' if destaque.kind=='aprovado' else 'x' if destaque.kind=='rejeitado' else 'clock' }}"></i>
+          {{ destaque.kind|capitalize }}{% if not multi %} · {{ item.sim }} a {{ item.nao }}{% endif %}
+        </span>
+        {% if destaque.objeto %}<span class="tag">{{ destaque.objeto }}</span>{% endif %}
+        <span class="muted" style="font-size:12.5px">{{ destaque.sigla_orgao }} · {{ destaque.data }}</span>
+      </div>
+      <h3 class="lp-dest-title">{{ destaque.titulo }}</h3>
+      {% if destaque.ementa %}<p class="lp-dest-em">{{ destaque.ementa|truncate(180) }}</p>{% endif %}
+      <span class="lp-dest-cta">Ver como cada um votou <i data-lucide="arrow-right"></i></span>
+    </a>
+  </div>
+</section>
+{% endif %}
+
+<!-- O QUE TÁ ROLANDO -->
+<section class="section" style="background:var(--paper-1);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="wrap wrap-wide">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px">
+      <div class="section-head" style="margin-bottom:0">
+        <span class="eyebrow">Agora</span>
+        <h2 class="h2">O que tá rolando</h2>
+      </div>
+      <a class="btn btn-ghost btn-sm" href="/agora">Ver tudo <i data-lucide="arrow-right"></i></a>
+    </div>
+    <div class="feed-list">
+      {% for g in feed %}
+      {% set item = g.votacoes[0] %}
+      {% set multi = g.votacoes|length > 1 %}
+      <a class="card feed-item" href="/votacoes/{{ item.id }}">
+        <div class="icn icn-{{ g.kind }}">
+          <i data-lucide="{{ 'layers' if multi else ('check' if g.kind=='aprovado' else 'x' if g.kind=='rejeitado' else 'clock') }}"></i>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div class="meta"><span class="eyebrow" style="text-transform:none;letter-spacing:0">{{ g.sigla_orgao }} · {{ g.data }}{% if multi %} · {{ g.votacoes|length }} votações{% endif %}</span></div>
+          <div class="ft">{{ g.titulo }}</div>
+          <div class="meta">
+            {% if g.objeto %}<span class="tag">{{ g.objeto }}</span>{% endif %}
+            <span class="res" style="color:{{ 'var(--clay-700)' if g.kind=='rejeitado' else 'var(--green-700)' if g.kind=='aprovado' else 'var(--amber-700)' }}">{{ g.kind|capitalize }}{% if not multi %} · {{ item.sim }} a {{ item.nao }}{% endif %}</span>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- RECURSOS -->
+<section class="section">
+  <div class="wrap wrap-wide">
+    <div class="section-head">
+      <span class="eyebrow">Por dentro</span>
+      <h2 class="h2">Tudo o que é público, finalmente legível</h2>
+      <p>Pegamos os dados abertos da Câmara e do TSE, densos e fragmentados, e transformamos em algo que dá pra entender e agir.</p>
+    </div>
+    <div class="feat-grid">
+      <a class="card feat" href="/votacoes">
+        <div class="ic"><i data-lucide="vote"></i></div>
+        <h3>Como cada um vota</h3>
+        <p>O voto de cada deputado nas decisões que importam, com o placar e o recorte por partido.</p>
+      </a>
+      <a class="card feat" href="/gastos">
+        <div class="ic" style="background:var(--clay-100);color:var(--clay-700)"><i data-lucide="receipt"></i></div>
+        <h3>Para onde vai a cota</h3>
+        <p>Cada nota fiscal da cota parlamentar, quem recebeu, de qual deputado e em quê.</p>
+      </a>
+      <a class="card feat" href="/deputados">
+        <div class="ic" style="background:var(--amber-100);color:var(--amber-700)"><i data-lucide="user-check"></i></div>
+        <h3>Presença e atuação</h3>
+        <p>Quem aparece, quem falta, o que propõe e como se elegeu. O retrato completo do mandato.</p>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- COBRE SEU DEPUTADO -->
+<section class="section" style="background:var(--paper-1);border-top:1px solid var(--border)">
+  <div class="wrap wrap-wide">
+    <div class="section-head">
+      <span class="eyebrow">Cobre seu deputado</span>
+      <h2 class="h2">Da indignação à mensagem, em três passos</h2>
+      <p>Não fica só na revolta do grupo da família. Mande direto pro gabinete.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="num">01</div><h4>Encontre o deputado</h4><p>Busque pelo nome ou pelo seu estado e abra o perfil com votos e gastos.</p></div>
+      <div class="step"><div class="num">02</div><h4>Monte a mensagem</h4><p>Comece de um modelo pronto, sobre um voto, um gasto ou a presença, e edite com suas palavras.</p></div>
+      <div class="step"><div class="num">03</div><h4>Envie em 30 segundos</h4><p>Dispara direto pro e-mail oficial do gabinete. Sem cadastro, sem burocracia.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- FAIXA FINAL -->
+<section class="band">
+  <div class="wrap wrap-wide band-in">
+    <div>
+      <h2>Pronto pra cobrar?</h2>
+      <p>Escolha um deputado e mande sua mensagem agora. Leva menos tempo que reclamar no almoço de domingo.</p>
+    </div>
+    <a class="btn btn-action btn-lg" href="/deputados"><i data-lucide="megaphone"></i>Cobrar um deputado</a>
+  </div>
+</section>
+{% endblock %}

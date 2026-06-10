@@ -1,0 +1,17 @@
+# Ambiente
+.venv/
+__pycache__/
+*.pyc
+.env
+.DS_Store
+
+# Banco local (SQLite) e arquivos do WAL
+*.db
+*.db-wal
+*.db-shm
+
+# Ferramentas/agentes locais: não fazem parte do app
+.claude/
+
+# Pytest
+.pytest_cache/

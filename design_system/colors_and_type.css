@@ -1,0 +1,284 @@
+/* ============================================================
+   R$ TRANSPARÊNCIA — Foundations: Color + Type
+   Civic data-journalism platform. Earthy reimagined verde-amarelo.
+   Sober, institutional, trustworthy. No literal flag colors.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* ---------------------------------------------------------
+     FONT FAMILIES
+     Serif  → editorial headlines (authority, data-desk)
+     Sans   → UI + body
+     Mono   → data, numbers, tabular figures, labels
+     --------------------------------------------------------- */
+  --font-serif: 'IBM Plex Serif', 'Georgia', serif;
+  --font-sans:  'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono:  'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  /* ---------------------------------------------------------
+     PALETTE — BASE TOKENS (raw values, do not use directly in
+     components when a semantic token exists)
+     --------------------------------------------------------- */
+
+  /* Warm paper & ink neutrals --------------------------------*/
+  --paper-0:  #FAF6EC;  /* page background — warm ivory */
+  --paper-1:  #FFFFFF;  /* raised cards */
+  --paper-2:  #F3EDDD;  /* subtle fills, table stripes */
+  --paper-3:  #EBE3D0;  /* deeper fill, hover wells */
+  --line:     #E1D8C4;  /* hairline borders */
+  --line-2:   #CFC3A6;  /* stronger borders / dividers */
+
+  --ink-1: #1E1B14;  /* primary text — warm near-black */
+  --ink-2: #57513F;  /* secondary text */
+  --ink-3: #8A8268;  /* muted text, captions, placeholders */
+  --ink-on-dark: #F2ECDC; /* text on dark green */
+
+  /* Pine / petróleo green — PRIMARY brand --------------------*/
+  --green-950: #0B221A;
+  --green-900: #102C21;
+  --green-800: #163A2C;  /* ← brand primary */
+  --green-700: #1E4A39;
+  --green-600: #2A5E48;
+  --green-500: #3C7559;
+  --green-400: #5A917A;
+  --green-300: #8FB3A1;
+  --green-200: #C2D6CB;
+  --green-100: #DEEAE2;
+  --green-50:  #EEF4EF;
+
+  /* Aged gold / mustard amber — ACCENT (highlight, focus) ----*/
+  --amber-700: #80590E;
+  --amber-600: #9C6E12;
+  --amber-500: #C0871A;  /* ← accent */
+  --amber-400: #D5A436;
+  --amber-300: #E3C06D;
+  --amber-200: #EED9A3;
+  --amber-100: #F6EBCC;
+
+  /* Terracotta / clay — ACTION ("cobre") + alert ------------*/
+  --clay-800: #6F2C18;
+  --clay-700: #8B3A22;
+  --clay-600: #A8442A;  /* ← action / cobre CTA */
+  --clay-500: #C2573A;
+  --clay-300: #DD9B85;
+  --clay-200: #ECC6B9;
+  --clay-100: #F6E4DA;
+
+  /* Petróleo blue — info / links / 3rd data hue -------------*/
+  --petro-700: #154A57;
+  --petro-600: #1F5E6E;
+  --petro-500: #2B7484;
+  --petro-200: #B7D5DB;
+  --petro-100: #DDEBEE;
+
+  /* Ochre — neutral data hue --------------------------------*/
+  --ochre-600: #8A6D2F;
+  --ochre-400: #B5934A;
+
+  /* ---------------------------------------------------------
+     SEMANTIC TOKENS — reference these in components
+     --------------------------------------------------------- */
+
+  /* Surfaces */
+  --bg-page:        var(--paper-0);
+  --bg-surface:     var(--paper-1);
+  --bg-subtle:      var(--paper-2);
+  --bg-well:        var(--paper-3);
+  --bg-inverse:     var(--green-800);
+  --bg-inverse-deep:var(--green-950);
+
+  /* Text */
+  --fg-1: var(--ink-1);
+  --fg-2: var(--ink-2);
+  --fg-3: var(--ink-3);
+  --fg-inverse: var(--ink-on-dark);
+  --fg-brand: var(--green-800);
+  --fg-link: var(--petro-600);
+
+  /* Brand */
+  --brand:        var(--green-800);
+  --brand-hover:  var(--green-700);
+  --brand-press:  var(--green-900);
+  --accent:       var(--amber-500);   /* the cifrão / highlight */
+  --action:       var(--clay-600);    /* cobre / primary CTA */
+  --action-hover: var(--clay-700);
+  --action-press: var(--clay-800);
+
+  /* Borders & focus */
+  --border:        var(--line);
+  --border-strong: var(--line-2);
+  --focus-ring:    var(--amber-500);
+
+  /* Status — voting / tramitação */
+  --status-aprovado:   var(--green-600);  /* aprovado / sim */
+  --status-aprovado-bg:var(--green-100);
+  --status-rejeitado:  var(--clay-600);   /* rejeitado / não */
+  --status-rejeitado-bg:var(--clay-100);
+  --status-tramitando: var(--amber-600);  /* em tramitação / pendente */
+  --status-tramitando-bg:var(--amber-100);
+  --status-ausente:    var(--ink-3);      /* ausente / abstenção */
+  --status-ausente-bg: var(--paper-3);
+  --status-info:       var(--petro-600);
+  --status-info-bg:    var(--petro-100);
+
+  /* Data-viz categorical ramp */
+  --viz-1: var(--green-600);
+  --viz-2: var(--amber-500);
+  --viz-3: var(--clay-600);
+  --viz-4: var(--petro-500);
+  --viz-5: var(--ochre-600);
+  --viz-6: var(--green-300);
+
+  /* ---------------------------------------------------------
+     SPACING — 4px base scale
+     --------------------------------------------------------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+
+  /* ---------------------------------------------------------
+     RADII — restrained. Institutional, mostly squared.
+     --------------------------------------------------------- */
+  --radius-xs: 3px;
+  --radius-sm: 5px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+
+  /* ---------------------------------------------------------
+     ELEVATION — soft, warm-tinted, low. No hard drop shadows.
+     --------------------------------------------------------- */
+  --shadow-sm: 0 1px 2px rgba(30, 27, 20, 0.06);
+  --shadow-md: 0 2px 6px rgba(30, 27, 20, 0.07), 0 1px 2px rgba(30, 27, 20, 0.05);
+  --shadow-lg: 0 8px 24px rgba(30, 27, 20, 0.10), 0 2px 6px rgba(30, 27, 20, 0.06);
+  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+
+  /* ---------------------------------------------------------
+     TYPE SCALE — px sizes / line-heights
+     Headlines = serif. UI/body = sans. Data = mono.
+     --------------------------------------------------------- */
+  --text-display-1: 52px;  --lh-display-1: 1.06;
+  --text-display-2: 40px;  --lh-display-2: 1.10;
+  --text-h1: 32px;         --lh-h1: 1.18;
+  --text-h2: 25px;         --lh-h2: 1.25;
+  --text-h3: 20px;         --lh-h3: 1.35;
+  --text-body-lg: 18px;    --lh-body-lg: 1.6;
+  --text-body: 16px;       --lh-body: 1.62;
+  --text-small: 14px;      --lh-small: 1.5;
+  --text-caption: 12.5px;  --lh-caption: 1.4;
+
+  --tracking-tight: -0.015em;
+  --tracking-normal: 0;
+  --tracking-label: 0.08em;  /* uppercase mono eyebrows */
+}
+
+/* ============================================================
+   SEMANTIC TYPE CLASSES
+   ============================================================ */
+
+.t-display-1 {
+  font-family: var(--font-serif);
+  font-size: var(--text-display-1);
+  line-height: var(--lh-display-1);
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  color: var(--fg-1);
+}
+.t-display-2 {
+  font-family: var(--font-serif);
+  font-size: var(--text-display-2);
+  line-height: var(--lh-display-2);
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  color: var(--fg-1);
+}
+.t-h1 {
+  font-family: var(--font-serif);
+  font-size: var(--text-h1);
+  line-height: var(--lh-h1);
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  color: var(--fg-1);
+}
+.t-h2 {
+  font-family: var(--font-serif);
+  font-size: var(--text-h2);
+  line-height: var(--lh-h2);
+  font-weight: 600;
+  color: var(--fg-1);
+}
+.t-h3 {
+  font-family: var(--font-sans);
+  font-size: var(--text-h3);
+  line-height: var(--lh-h3);
+  font-weight: 600;
+  color: var(--fg-1);
+}
+.t-body-lg {
+  font-family: var(--font-sans);
+  font-size: var(--text-body-lg);
+  line-height: var(--lh-body-lg);
+  font-weight: 400;
+  color: var(--fg-2);
+}
+.t-body {
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+  font-weight: 400;
+  color: var(--fg-2);
+}
+.t-small {
+  font-family: var(--font-sans);
+  font-size: var(--text-small);
+  line-height: var(--lh-small);
+  font-weight: 400;
+  color: var(--fg-2);
+}
+.t-caption {
+  font-family: var(--font-sans);
+  font-size: var(--text-caption);
+  line-height: var(--lh-caption);
+  color: var(--fg-3);
+}
+/* Mono eyebrow / data label — uppercase, tracked */
+.t-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  line-height: 1.3;
+  font-weight: 500;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+/* Tabular numbers — for money, votes, counts */
+.t-data {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-feature-settings: 'tnum' 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-1);
+}
+
+/* ============================================================
+   BASELINE ELEMENT DEFAULTS (optional convenience)
+   ============================================================ */
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+  color: var(--fg-1);
+  background: var(--bg-page);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+a { color: var(--fg-link); text-decoration: none; }
+a:hover { text-decoration: underline; }

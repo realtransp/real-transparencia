@@ -1,0 +1,147 @@
+{# ========================================================================
+   Componentes reutilizáveis do design system R$ Transparência.
+   Usa globals registrados em main.py: initials, party_color, avatar_bg,
+   avatar_fg, brl, brlf, num, vote_label, vote_icon.
+   ======================================================================== #}
+
+{# Anúncio AdSense: discreto, só renderiza se houver publisher id + slot. #}
+{% macro ad_unit(slot) %}
+  {% if adsense_client and slot %}
+  <div class="ad-wrap">
+    <span class="ad-label">Publicidade</span>
+    <ins class="adsbygoogle" style="display:block" data-ad-client="{{ adsense_client }}"
+         data-ad-slot="{{ slot }}" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+  {% endif %}
+{% endmacro %}
+
+{# Stat card: fiel ao design, rótulo mono em cima, valor mono grande embaixo. #}
+{% macro stat_card(label, value, sub=None, color=None) %}
+  <div class="stat-card">
+    <div class="sc-l">{{ label }}</div>
+    <div class="sc-v"{% if color %} style="color:{{ color }}"{% endif %}>{{ value }}</div>
+    {% if sub is not none %}<div class="sc-sub">{{ sub }}</div>{% endif %}
+  </div>
+{% endmacro %}
+
+{# Faixa de métricas: UMA caixa, valores lado a lado com divisórias (denso, sem boxes vazios).
+   metrics = lista de (valor, rotulo) ou (valor, rotulo, cor). #}
+{% macro metric_strip(metrics) %}
+  <div class="card metric-strip">
+    {% for m in metrics %}
+    <div class="metric">
+      <div class="m-v"{% if m|length > 2 and m[2] %} style="color:{{ m[2] }}"{% endif %}>{{ m[0] }}</div>
+      <div class="m-l">{{ m[1] }}</div>
+    </div>
+    {% endfor %}
+  </div>
+{% endmacro %}
+
+{# Gasto mês a mês: linhas compactas com valor + barra (só meses com gasto). #}
+{% macro month_rows(mensal) %}
+  {% set mn = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'] %}
+  {% set maxm = mensal | max if (mensal | max) > 0 else 1 %}
+  {% set tem = mensal | select('gt', 0) | list | length %}
+  {% if tem %}
+  <div class="mrows">
+    {% for v in mensal %}{% if v > 0 %}
+    <div class="mrow">
+      <span class="mrow-l">{{ mn[loop.index0] }}</span>
+      <div class="mrow-track"><div class="mrow-fill {{ 'hi' if v == maxm }}" style="width:{{ (v / maxm * 100) | round | int }}%"></div></div>
+      <span class="mrow-v">{{ v | brl }}</span>
+    </div>
+    {% endif %}{% endfor %}
+  </div>
+  {% else %}<p class="muted" style="font-size:13px">Sem gastos no período.</p>{% endif %}
+{% endmacro %}
+
+{% macro avatar(nome, foto, party, size=52) %}
+  {% set color = party_color(party) %}
+  {% if foto %}
+    <img class="ava" src="{{ foto }}" alt="" loading="lazy"
+         style="width:{{ size }}px;height:{{ size }}px;object-fit:cover">
+  {% else %}
+    <div class="ava" style="width:{{ size }}px;height:{{ size }}px;font-size:{{ (size*0.38)|round|int }}px;
+         background:{{ avatar_bg(color) }};color:{{ avatar_fg(color) }}">{{ initials(nome) }}</div>
+  {% endif %}
+{% endmacro %}
+
+{% macro party_tag(party, uf, term=None) %}
+  <span class="tag">
+    <span class="sq" style="background:{{ party_color(party) }}"></span>
+    {{ party or '—' }} · {{ uf or '—' }}{% if term %} · {{ term }}{% endif %}
+  </span>
+{% endmacro %}
+
+{% macro vote_badge(kind) %}
+  <span class="vote v-{{ 'sim' if kind=='sim' else 'nao' if kind=='nao' else 'abs' }}">
+    <i data-lucide="{{ vote_icon[kind] }}"></i>{{ vote_label[kind] }}
+  </span>
+{% endmacro %}
+
+{# Botão "Cobrar": carrega os dados do deputado em data-attrs para o modal JS #}
+{% macro cobre_button(dep, label='Cobrar', cls='btn btn-action', icon='megaphone') %}
+  <button class="{{ cls }} js-cobrar"
+    data-name="{{ dep.nome }}"
+    data-party="{{ dep.sigla_partido or '' }}"
+    data-uf="{{ dep.sigla_uf or '' }}"
+    data-email="{{ dep.email or '' }}"
+    data-initials="{{ initials(dep.nome) }}"
+    data-color="{{ party_color(dep.sigla_partido) }}"
+    data-presence="{{ dep.presence if dep.presence is not none else '—' }}">
+    {% if icon %}<i data-lucide="{{ icon }}"></i>{% endif %}{{ label }}
+  </button>
+{% endmacro %}
+
+{# Modal "Cobre seu deputado": instância única, preenchida via app.js #}
+{% macro cobre_modal() %}
+<div id="cobre-modal" style="display:none">
+  <div class="overlay">
+    <div class="modal">
+      <div class="js-step-form">
+        <div class="modal-head">
+          <div class="ava js-ava" style="width:46px;height:46px;font-size:18px"></div>
+          <div>
+            <div class="js-title" style="font-family:var(--font-serif);font-weight:600;font-size:18px"></div>
+            <div class="js-sub muted" style="font-size:13px"></div>
+          </div>
+          <button class="x js-cobre-close"><i data-lucide="x"></i></button>
+        </div>
+        <div class="modal-body">
+          <label class="field-label">Para onde vai</label>
+          <div class="channel js-channel on" data-channel="email">
+            <div class="ci" style="background:var(--amber-100);color:var(--amber-700)"><i data-lucide="mail"></i></div>
+            <div><div class="ct">E-mail oficial do gabinete</div><div class="cs js-email-label"></div></div>
+          </div>
+
+          <label class="field-label">Comece de um modelo</label>
+          <div class="template-row">
+            <button class="chip js-tpl" data-tpl="voto">Sobre um voto</button>
+            <button class="chip js-tpl" data-tpl="gasto">Sobre um gasto</button>
+            <button class="chip js-tpl" data-tpl="presenca">Sobre a presença</button>
+          </div>
+
+          <label class="field-label">Sua mensagem <span class="muted" style="font-weight:400">· edite à vontade</span></label>
+          <textarea class="msg-box js-msg"></textarea>
+
+          <div class="modal-foot">
+            <button class="btn btn-secondary js-cobre-close">Cancelar</button>
+            <button class="btn btn-amber btn-block js-send"><i data-lucide="mail"></i>Enviar</button>
+          </div>
+          <p class="muted" style="font-size:11.5px;margin-top:12px;line-height:1.5;text-align:center">
+            Você revê e confirma no seu app antes de enviar. Não guardamos sua mensagem.
+          </p>
+        </div>
+      </div>
+
+      <div class="js-step-sent sent" style="display:none">
+        <div class="ok"><i data-lucide="check"></i></div>
+        <div style="font-family:var(--font-serif);font-weight:600;font-size:21px;margin-bottom:6px">Mensagem pronta!</div>
+        <p class="muted js-sent-text" style="font-size:14.5px;line-height:1.6;max-width:40ch;margin:0 auto 22px"></p>
+        <button class="btn btn-primary js-cobre-close">Voltar ao portal</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endmacro %}

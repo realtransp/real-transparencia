@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_card.css">
+<style>
+  .lead { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); margin-bottom: 12px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .dep { background: var(--paper-1); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden; }
+  .dep .top { display: flex; gap: 12px; padding: 14px 14px 12px; }
+  .ava { width: 52px; height: 52px; border-radius: var(--radius-md); background: var(--green-100); color: var(--green-700); display:flex; align-items:center; justify-content:center; font-family: var(--font-serif); font-weight: 600; font-size: 20px; flex: none; }
+  .nm { font-family: var(--font-serif); font-weight: 600; font-size: 17px; color: var(--fg-1); line-height: 1.2; }
+  .tag { display:inline-flex; align-items:center; gap:5px; margin-top:5px; white-space:nowrap; font-family: var(--font-mono); font-size: 10.5px; font-weight: 500; padding: 3px 7px; border-radius: var(--radius-sm); background: var(--paper-2); color: var(--fg-2); border: 1px solid var(--border); }
+  .tag .sq { width: 7px; height: 7px; border-radius: 2px; }
+  .stats { display: flex; border-top: 1px solid var(--border); }
+  .stat { flex: 1; padding: 9px 14px; }
+  .stat + .stat { border-left: 1px solid var(--border); }
+  .stat .v { font-family: var(--font-mono); font-weight: 600; font-size: 15px; color: var(--fg-1); }
+  .stat .l { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); margin-top: 2px; }
+  .foot { display:flex; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--border); background: var(--paper-0); }
+  .mini { flex:1; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-family: var(--font-sans); font-size: 12.5px; font-weight: 600; padding: 7px; border-radius: var(--radius-sm); cursor:pointer; }
+  .mini svg { width: 14px; height: 14px; }
+  .m-prim { background: var(--green-800); color: var(--paper-0); }
+  .m-act { background: var(--clay-600); color: #fff; }
+</style>
+</head>
+<body>
+  <div class="lead">Cartão de deputado</div>
+  <div class="grid">
+    <div class="dep">
+      <div class="top">
+        <div class="ava">CM</div>
+        <div>
+          <div class="nm">Carla Medeiros</div>
+          <span class="tag"><span class="sq" style="background:var(--green-600)"></span>PT · SP · 3º mandato</span>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="v">91%</div><div class="l">Presença</div></div>
+        <div class="stat"><div class="v">R$ 198k</div><div class="l">Cota 2024</div></div>
+      </div>
+      <div class="foot">
+        <span class="mini m-prim"><i data-lucide="bar-chart-3"></i>Atividade</span>
+        <span class="mini m-act"><i data-lucide="megaphone"></i>Cobrar</span>
+      </div>
+    </div>
+    <div class="dep">
+      <div class="top">
+        <div class="ava" style="background:var(--clay-100);color:var(--clay-700)">RA</div>
+        <div>
+          <div class="nm">Rui Alencar</div>
+          <span class="tag"><span class="sq" style="background:var(--clay-600)"></span>PL · RJ · 1º mandato</span>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="v" style="color:var(--clay-600)">63%</div><div class="l">Presença</div></div>
+        <div class="stat"><div class="v">R$ 241k</div><div class="l">Cota 2024</div></div>
+      </div>
+      <div class="foot">
+        <span class="mini m-prim"><i data-lucide="bar-chart-3"></i>Atividade</span>
+        <span class="mini m-act"><i data-lucide="megaphone"></i>Cobrar</span>
+      </div>
+    </div>
+  </div>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

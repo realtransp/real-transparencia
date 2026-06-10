@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_card.css">
+<style>
+  .grp { margin-bottom: 14px; }
+  .lead { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); margin-bottom: 8px; }
+  .scale { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0; border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); }
+  .sw { height: 60px; display: flex; flex-direction: column; justify-content: flex-end; padding: 6px 7px; }
+  .sw .n { font-family: var(--font-mono); font-size: 9.5px; }
+  .sw .h { font-family: var(--font-mono); font-size: 9px; opacity: 0.85; }
+  .border-sw { border: 1px solid var(--border); }
+</style>
+</head>
+<body>
+  <div class="grp">
+    <div class="lead">Papel — superfícies (claro → escuro)</div>
+    <div class="scale" style="border:1px solid var(--border);">
+      <div class="sw border-sw" style="background:var(--paper-0);color:#57513f"><span class="n">paper-0</span><span class="h">#FAF6EC</span></div>
+      <div class="sw border-sw" style="background:var(--paper-1);color:#57513f"><span class="n">surface</span><span class="h">#FFFFFF</span></div>
+      <div class="sw border-sw" style="background:var(--paper-2);color:#57513f"><span class="n">subtle</span><span class="h">#F3EDDD</span></div>
+      <div class="sw border-sw" style="background:var(--paper-3);color:#57513f"><span class="n">well</span><span class="h">#EBE3D0</span></div>
+      <div class="sw border-sw" style="background:var(--line);color:#57513f"><span class="n">line</span><span class="h">#E1D8C4</span></div>
+      <div class="sw border-sw" style="background:var(--line-2);color:#3a3528"><span class="n">line-2</span><span class="h">#CFC3A6</span></div>
+    </div>
+  </div>
+  <div class="grp" style="margin-bottom:0;">
+    <div class="lead">Tinta — texto</div>
+    <div class="scale">
+      <div class="sw" style="background:var(--ink-1);color:#f2ecdc"><span class="n">fg-1</span><span class="h">#1E1B14</span></div>
+      <div class="sw" style="background:var(--ink-2);color:#f2ecdc"><span class="n">fg-2</span><span class="h">#57513F</span></div>
+      <div class="sw" style="background:var(--ink-3);color:#1e1b14"><span class="n">fg-3</span><span class="h">#8A8268</span></div>
+      <div class="sw" style="background:var(--petro-600);color:#ddebee"><span class="n">link</span><span class="h">#1F5E6E</span></div>
+      <div class="sw" style="background:var(--ink-on-dark);color:#1e1b14;border:1px solid var(--line)"><span class="n">on-dark</span><span class="h">#F2ECDC</span></div>
+      <div class="sw" style="background:var(--paper-1);color:#8a8268;border:1px solid var(--line)"><span class="n"> </span><span class="h"> </span></div>
+    </div>
+  </div>
+</body>
+</html>

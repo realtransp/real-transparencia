@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_card.css">
+<style>
+  .lead { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-3); margin-bottom: 12px; }
+  .grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 14px; }
+  .stat { background: var(--paper-1); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; box-shadow: var(--shadow-sm); }
+  .stat .l { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-3); }
+  .stat .v { font-family: var(--font-mono); font-weight: 600; font-size: 30px; color: var(--fg-1); margin: 8px 0 2px; }
+  .delta { font-family: var(--font-sans); font-size: 12px; font-weight: 600; display:inline-flex; align-items:center; gap:3px; }
+  .delta svg { width: 13px; height: 13px; }
+  .up { color: var(--clay-600); }
+  /* mini bar chart */
+  .chart .l { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-3); margin-bottom: 14px; }
+  .bars { display:flex; align-items:flex-end; gap:8px; height: 78px; }
+  .bars .b { flex:1; background: var(--green-600); border-radius: 2px 2px 0 0; position: relative; }
+  .bars .b.hi { background: var(--clay-600); }
+  .bars .b span { position:absolute; top:-15px; left:0; right:0; text-align:center; font-family: var(--font-mono); font-size: 9px; color: var(--fg-3); }
+  .xlab { display:flex; gap:8px; margin-top:6px; }
+  .xlab span { flex:1; text-align:center; font-family: var(--font-mono); font-size: 9px; color: var(--fg-3); }
+</style>
+</head>
+<body>
+  <div class="lead">Cartões de estatística &amp; gráfico</div>
+  <div class="grid">
+    <div class="stat">
+      <div class="l">Gasto total · 2024</div>
+      <div class="v" style="color:var(--clay-600)">R$ 218k</div>
+      <span class="delta up"><i data-lucide="trending-up"></i>+12% vs 2023</span>
+    </div>
+    <div class="stat chart">
+      <div class="l">Cota mensal · R$ mil</div>
+      <div class="bars">
+        <div class="b" style="height:40%"><span>14</span></div>
+        <div class="b" style="height:62%"><span>21</span></div>
+        <div class="b" style="height:48%"><span>16</span></div>
+        <div class="b hi" style="height:100%"><span>34</span></div>
+        <div class="b" style="height:70%"><span>24</span></div>
+        <div class="b" style="height:55%"><span>19</span></div>
+      </div>
+      <div class="xlab"><span>jul</span><span>ago</span><span>set</span><span>out</span><span>nov</span><span>dez</span></div>
+    </div>
+  </div>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

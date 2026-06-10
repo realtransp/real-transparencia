@@ -1,0 +1,26 @@
+{# Fragmento do autocomplete da home (injetado via HTMX). #}
+{% if partidos or deps %}
+<div class="bs-dropdown">
+  {% if partidos %}
+  <div class="bs-gl">Partidos</div>
+  {% for p in partidos %}
+  <a class="bs-item" href="/relatorio?escopo=partido&alvo={{ p|urlencode }}">
+    <span class="bs-ico"><i data-lucide="users"></i></span>
+    <span class="bs-nm">{{ p }}</span><span class="bs-sub">Raio-X da bancada</span>
+  </a>
+  {% endfor %}
+  {% endif %}
+  {% if deps %}
+  <div class="bs-gl">Deputados</div>
+  {% for d in deps %}
+  <a class="bs-item" href="/deputados/{{ d.id }}">
+    {% if d.url_foto %}<img class="bs-av" src="{{ d.url_foto }}" alt="" loading="lazy">{% else %}<span class="bs-ico"><i data-lucide="user"></i></span>{% endif %}
+    <span class="bs-nm">{{ d.nome }}</span><span class="bs-sub">{{ d.sigla_partido }}-{{ d.sigla_uf }}</span>
+  </a>
+  {% endfor %}
+  {% endif %}
+</div>
+{% else %}
+<div class="bs-dropdown"><div class="bs-empty">Nada encontrado para “{{ q }}”.</div></div>
+{% endif %}
+<script>window.lucide&&lucide.createIcons()</script>

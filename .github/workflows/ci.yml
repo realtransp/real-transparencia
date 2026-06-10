@@ -1,0 +1,42 @@
+name: CI
+
+# Restrito de propósito (evitar gastar minutos):
+# - Não roda em push. Só manualmente (workflow_dispatch) ou em pull_request.
+# - O job usa o environment "ci", que deve ter VOCÊ como required reviewer
+#   (Settings > Environments > ci > Required reviewers). Assim o run fica
+#   "Waiting" e SÓ consome runner depois que você aprovar.
+# - Ignora mudanças só de documentação, cancela runs duplicados e tem timeout.
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main, master]
+    paths-ignore:
+      - "**/*.md"
+      - "LICENSE"
+      - "docs/**"
+      - "design_system/**"
+
+# Um run novo no mesmo branch cancela o anterior (não acumula minutos).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    environment: ci          # trava: exige aprovação manual (required reviewer)
+    timeout-minutes: 10      # teto de segurança de minutos
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instala uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Sincroniza dependências (com dev)
+        run: uv sync --extra dev
+
+      - name: Roda os testes
+        run: uv run pytest

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Fornecedores · R$ Transparência{% endblock %}
+{% block content %}
+<div class="wrap wrap-wide page-head">
+  <span class="eyebrow">Cota parlamentar (CEAP)</span>
+  <h1 class="h1">Quem mais recebe da cota</h1>
+  <p class="lead" style="margin-top:8px;font-size:16px">Empresas e pessoas que mais receberam pagamentos das despesas dos deputados.</p>
+</div>
+<div class="wrap wrap-wide" style="padding-bottom:64px">
+  <div class="card" style="overflow:hidden">
+    <table class="rank-table">
+      <thead><tr><th class="rk">#</th><th>Fornecedor</th><th>CNPJ/CPF</th><th class="num">Nº notas</th><th class="num">Total recebido</th></tr></thead>
+      <tbody>
+        {% for f in fornecedores %}
+        <tr>
+          <td class="rk">{{ loop.index }}</td>
+          <td style="font-weight:600">{{ f.fornecedor }}</td>
+          <td class="muted data" style="font-size:12.5px">{{ f.documento or '—' }}</td>
+          <td class="num">{{ f.qtd | num }}</td>
+          <td class="num">{{ f.total | brl }}</td>
+        </tr>
+        {% else %}<tr><td colspan="5" class="muted">Sem dados.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

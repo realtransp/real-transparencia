@@ -1,0 +1,170 @@
+{# Narrativa DEPUTADO: responsabilização individual, o que custa, o que produz e a serviço de quem vota. #}
+{% from "_raiox_macros.html" import teto_gauge, serie_mini, producao, selo_badge, leitura, lede, fecho %}
+{% from "_components.html" import ad_unit %}
+{% set vt = d.votos %}
+{% set mn = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'] %}
+
+<!-- HERO -->
+<div class="wrap wrap-wide">
+  <div class="rx-hero">
+    <div class="rx-hero-main">
+      <span class="eyebrow">O que custa aos cofres</span>
+      <div class="rx-hero-num">{{ d.gasto | brl }}</div>
+      <p>em cota parlamentar (CEAP) em {{ ano }}{% if d.percentil and d.percentil.total > 1 %}, gasta mais que <strong>{{ d.percentil.acima_de }}%</strong> dos deputados, o <strong>{{ d.percentil.rank }}º</strong> maior gasto da Câmara{% endif %}.</p>
+    </div>
+    <div class="rx-hero-side">
+      {% if d.presenca %}<div class="rx-badge {{ 'good' if d.presenca.acima else 'bad' }}"><div class="bv">{{ d.presenca.pct }}%</div><div class="bl">presença no plenário</div></div>{% endif %}
+      {% if d.producao and d.producao.projetos %}<div class="rx-badge"><div class="bv">{{ d.producao.projetos }}</div><div class="bl">projetos de lei</div></div>{% endif %}
+      {% if d.fidelidade %}<div class="rx-badge"><div class="bv">{{ d.fidelidade.pct }}%</div><div class="bl">segue o {{ d.fidelidade.partido }}</div></div>{% endif %}
+    </div>
+  </div>
+  {{ lede(d.narrativa) }}
+</div>
+
+<!-- 01 · A SERVIÇO DE QUEM VOTA -->
+<div class="wrap wrap-wide"><span class="rx-step"><b>01</b>A serviço de quem vota?</span></div>
+<div class="wrap wrap-wide gastos-grid">
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:4px">Independência do partido</h3>
+    <p class="muted" style="font-size:12.5px;margin-bottom:14px">Quantas vezes seguiu, ou bateu de frente com, a orientação da própria legenda.</p>
+    {% if d.fidelidade %}
+    <div class="rx-gauge">
+      <div class="big">{{ d.fidelidade.pct }}%</div>
+      <div class="meta">Seguiu o <strong>{{ d.fidelidade.partido }}</strong> em {{ d.fidelidade.conforme }} de {{ d.fidelidade.total }} votações com orientação.<br>
+        Divergiu (votou contra o líder) <strong>{{ d.fidelidade.rebelde }}</strong> {{ 'vez' if d.fidelidade.rebelde == 1 else 'vezes' }}.</div>
+    </div>
+    {% else %}<p class="muted">Sem votações com orientação no período.</p>{% endif %}
+    {{ leitura(d.leitura, 'fidelidade') }}
+    <div class="rx-align" style="margin-top:6px">
+      {% if d.alinhamento.governo %}
+      <div class="row"><div class="top"><span class="lbl">Vota com o Governo</span><span class="pct">{{ d.alinhamento.governo.pct }}%</span></div>
+        <div class="track"><div class="fill" style="width:{{ d.alinhamento.governo.pct }}%"></div></div></div>
+      {% endif %}
+      {% if d.alinhamento.maioria %}
+      <div class="row"><div class="top"><span class="lbl">Acompanha a Maioria</span><span class="pct">{{ d.alinhamento.maioria.pct }}%</span></div>
+        <div class="track"><div class="fill" style="width:{{ d.alinhamento.maioria.pct }}%;background:var(--amber-500)"></div></div></div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:10px">Como votou em {{ ano }}</h3>
+    {% if d.participacao %}
+    <div class="rx-cmp-line"><i data-lucide="list-checks"></i> Votou em <strong>{{ d.participacao.votou }}</strong> de <strong>{{ d.participacao.total }}</strong> votações nominais ({{ d.participacao.pct }}%)</div>
+    {% endif %}
+    <div class="tally-bar" style="margin:12px 0 14px">
+      {% set vtot = (vt.sim + vt.nao + vt.outros) or 1 %}
+      <div class="seg" style="width:{{ (vt.sim/vtot*100)|round(1) }}%;background:var(--green-600)"></div>
+      <div class="seg" style="width:{{ (vt.nao/vtot*100)|round(1) }}%;background:var(--clay-600)"></div>
+      <div class="seg" style="width:{{ (vt.outros/vtot*100)|round(1) }}%;background:var(--ink-3)"></div>
+    </div>
+    <ul class="ranklist">
+      <li><span class="vote v-sim"><i data-lucide="check"></i>Sim</span><strong>{{ vt.sim | num }}</strong></li>
+      <li><span class="vote v-nao"><i data-lucide="x"></i>Não</span><strong>{{ vt.nao | num }}</strong></li>
+      <li><span class="vote v-abs"><i data-lucide="minus"></i>Abstenção/obstrução</span><strong>{{ vt.outros | num }}</strong></li>
+    </ul>
+    {{ leitura(d.leitura, 'participacao') }}
+  </div>
+</div>
+
+<!-- 02 · O QUE PRODUZ -->
+{% if d.producao and d.producao.total %}
+<div class="wrap wrap-wide"><span class="rx-step"><b>02</b>O que propõe: produção legislativa</span></div>
+<div class="wrap wrap-wide">{{ producao(d, ano) }}{{ leitura(d.leitura, 'producao') }}</div>
+{% endif %}
+
+<!-- 03 · APARECE PRA TRABALHAR -->
+<div class="wrap wrap-wide"><span class="rx-step"><b>03</b>Aparece pra trabalhar?</span></div>
+<div class="wrap wrap-wide gastos-grid">
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:6px">Presença e assiduidade</h3>
+    {% if d.presenca %}
+    <div class="rx-gauge">
+      <div class="big {{ 'good' if d.presenca.acima else 'bad' }}">{{ d.presenca.pct }}%</div>
+      <div class="meta">Presente em {{ d.presenca.presentes }} de {{ d.presenca.total }} sessões.<br>
+        {{ d.presenca.faltas | num }} {{ 'falta' if d.presenca.faltas == 1 else 'faltas' }}.
+        {% if d.presenca.delta is not none %}
+        <div class="rx-cmp {{ 'up' if d.presenca.acima else 'down' }}">
+          <i data-lucide="{{ 'arrow-up' if d.presenca.acima else 'arrow-down' }}"></i>
+          {{ '+' if d.presenca.delta > 0 else '' }}{{ d.presenca.delta }} pts vs média ({{ d.presenca.media_geral }}%)
+        </div>{% endif %}
+      </div>
+    </div>
+    {% else %}<p class="muted">Sem dados de presença no período.</p>{% endif %}
+    {{ leitura(d.leitura, 'presenca') }}
+    {{ selo_badge(d.selo) }}
+  </div>
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:10px">Trajetória desde 2022</h3>
+    {{ serie_mini(d.serie, 'presenca', 'Presença no plenário (% ao ano)') }}
+    <div class="rx-mini" style="margin-top:12px">
+      <div class="it"><div class="v">{{ d.dias_trabalhados }}</div><div class="l">dias com presença registrada</div></div>
+      <div class="it"><div class="v">{{ d.dias_uteis }}</div><div class="l">dias úteis no ano</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap wrap-wide">{{ ad_unit(adsense_slot_artigo) }}</div>
+
+<!-- 04 · QUANTO CUSTA E EM QUE -->
+<div class="wrap wrap-wide"><span class="rx-step"><b>04</b>Quanto custa e em que gasta</span></div>
+<div class="wrap wrap-wide gastos-grid">
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:12px">Cota: uso vs. teto legal</h3>
+    {{ teto_gauge(d.teto, ano, d.parcial) }}
+    {{ leitura(d.leitura, 'teto') }}
+    {% if d.benchmark %}
+    <div class="rx-bench">
+      <div class="rx-bench-t">Comparado com a média de gasto:</div>
+      {% if d.benchmark.vs_partido is not none %}
+      <div class="rx-bench-row"><span>vs. média do {{ d.benchmark.partido }}</span>
+        <span class="d {{ 'up' if d.benchmark.vs_partido > 0 else 'down' }}">{{ '+' if d.benchmark.vs_partido > 0 else '' }}{{ d.benchmark.vs_partido }}%</span></div>
+      {% endif %}
+      {% if d.benchmark.vs_uf is not none %}
+      <div class="rx-bench-row"><span>vs. média de {{ d.benchmark.uf }}</span>
+        <span class="d {{ 'up' if d.benchmark.vs_uf > 0 else 'down' }}">{{ '+' if d.benchmark.vs_uf > 0 else '' }}{{ d.benchmark.vs_uf }}%</span></div>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:10px">Gasto ano a ano</h3>
+    {{ serie_mini(d.serie, 'gasto', 'Cota usada por ano (R$ milhões)') }}
+    {{ leitura(d.leitura, 'serie') }}
+    {% if d.concentracao %}
+    <div class="rx-conc {{ 'flag' if d.concentracao.pct >= 50 }}">
+      <i data-lucide="{{ 'alert-triangle' if d.concentracao.pct >= 50 else 'store' }}"></i>
+      <div>Maior fornecedor concentra <strong>{{ d.concentracao.pct }}%</strong> da cota
+        ({{ d.concentracao.top_nome | truncate(38) }}), de {{ d.concentracao.n_fornecedores }} fornecedores.</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% include "_raiox_gastos.html" %}
+
+<!-- 05 · DE ONDE VEIO O DINHEIRO -->
+{% if d.financiamento %}
+<div class="wrap wrap-wide"><span class="rx-step"><b>05</b>De onde veio o dinheiro da campanha</span></div>
+<div class="wrap wrap-wide">
+  <div class="card card-pad">
+    <div class="rx-mini" style="margin-bottom:10px">
+      <div class="it"><div class="v">{{ d.financiamento.total | brl }}</div><div class="l">arrecadado em campanha · 2022</div></div>
+      {% if d.financiamento.votos_recebidos %}<div class="it"><div class="v">{{ d.financiamento.votos_recebidos | num }}</div><div class="l">votos recebidos</div></div>{% endif %}
+      {% if d.financiamento.custo_por_voto %}<div class="it"><div class="v">R$ {{ ('%.2f' % d.financiamento.custo_por_voto)|replace('.', ',') }}</div><div class="l">custo por voto</div></div>{% endif %}
+      {% if d.financiamento.dependencia %}<div class="it"><div class="v {{ 'up' if d.financiamento.dependencia.pct >= 50 }}">{{ d.financiamento.dependencia.pct }}%</div><div class="l">veio do maior doador</div></div>{% endif %}
+    </div>
+    {{ leitura(d.leitura, 'financiamento') }}
+    {% if d.financiamento.doadores %}
+    <table class="rank-table">
+      <thead><tr><th>Maiores doadores</th><th class="num">Total</th></tr></thead>
+      <tbody>{% for doa in d.financiamento.doadores %}<tr><td>{{ doa.doador }}</td><td class="num">{{ doa.total | brl }}</td></tr>{% endfor %}</tbody>
+    </table>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<div class="wrap wrap-wide">{{ fecho(d.narrativa) }}</div>
+
+<div class="wrap wrap-wide" style="padding-bottom:8px">
+  <a class="btn btn-secondary" href="/deputados/{{ d.alvo }}"><i data-lucide="user"></i>Ver perfil completo de {{ d.alvo_nome.split(' ')[0] }}</a>
+</div>

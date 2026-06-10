@@ -1,0 +1,159 @@
+{# Macros reaproveitadas pelas narrativas do Raio-X. #}
+
+{# Gráfico de barras agrupadas: gasto mês a mês por ano do mandato (1..cut). #}
+{% macro barras_ano(multi, anos, cut) %}
+{% set mn = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'] %}
+{% set ns = namespace(mx=1) %}
+{% for a in anos %}{% for v in multi[a] %}{% if v > ns.mx %}{% set ns.mx = v %}{% endif %}{% endfor %}{% endfor %}
+<div class="barchart">
+  <div class="bc-legend">{% for a in anos %}<span class="bc-key bc-c{{ loop.index0 }}"></span>{{ a }}{% if not loop.last %}&nbsp;&nbsp;{% endif %}{% endfor %}</div>
+  <div class="bc-plot">
+    {% for mi in range(cut) %}
+    <div class="bc-month">
+      <div class="bc-bars">
+        {% for a in anos %}{% set v = multi[a][mi] %}
+        <div class="bc-bar bc-c{{ loop.index0 }}" style="height:{{ (v/ns.mx*118)|round|int }}px" title="{{ a }} · {{ mn[mi] }}: {{ v|brl }}"></div>
+        {% endfor %}
+      </div>
+      <div class="bc-ml">{{ mn[mi] }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endmacro %}
+
+{# Comparação por ano do mandato (mini-barras verticais), mobile-first.
+   por_ano: dict {ano: valor}; sub: texto auxiliar (ex.: nº de notas). #}
+{% macro cmp_anos(label, por_ano, anos, ano_atual, sub='') %}
+{% set ns = namespace(mx=1) %}
+{% for a in anos %}{% if (por_ano[a] or 0) > ns.mx %}{% set ns.mx = por_ano[a] %}{% endif %}{% endfor %}
+<div class="yrc">
+  <div class="yrc-head"><span class="yrc-label">{{ label }}</span>{% if sub %}<span class="yrc-sub">{{ sub }}</span>{% endif %}</div>
+  <div class="yrc-bars">
+    {% for a in anos %}
+    <div class="yrc-col{{ ' cur' if a==ano_atual }}">
+      <div class="yrc-v">{{ por_ano[a] | brl }}</div>
+      <div class="yrc-track"><div class="yrc-fill" style="height:{{ ((por_ano[a] or 0)/ns.mx*44)|round|int }}px"></div></div>
+      <div class="yrc-y">{{ a }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endmacro %}
+
+{# Abertura narrativa (story telling): o "retrato em um parágrafo". #}
+{% macro lede(narr) %}
+{% if narr and narr.lede %}
+<div class="rx-lede"><i data-lucide="quote"></i><p>{{ narr.lede | safe }}</p></div>
+{% endif %}
+{% endmacro %}
+
+{# Fechamento / alerta da narrativa. #}
+{% macro fecho(narr) %}
+{% if narr and narr.fecho %}
+<div class="rx-fecho {{ narr.fecho[1] or '' }}"><i data-lucide="{{ 'flag' if narr.fecho[1]=='flag' else 'info' }}"></i><p>{{ narr.fecho[0] | safe }}</p></div>
+{% endif %}
+{% endmacro %}
+
+{# Leitura analítica acoplada a um widget. L=d.leitura, slot=chave. #}
+{% macro leitura(L, slot) %}
+{% set it = L.get(slot) if L else None %}
+{% set _ic = {'good':'circle-check','bad':'circle-alert','flag':'flag'} %}
+{% if it %}
+<p class="leitura {{ it[1] or '' }}"><i data-lucide="{{ _ic.get(it[1], 'lightbulb') }}"></i><span>{{ it[0] }}</span></p>
+{% endif %}
+{% endmacro %}
+
+{# Medidor de uso do teto da CEAP (pró-rateado no ano em curso). #}
+{% macro teto_gauge(t, ano, parcial) %}
+{% if t and t.pct_periodo is not none %}
+{% set p = t.pct_periodo %}
+{% set cor = 'var(--clay-600)' if p >= 90 else ('var(--amber-500)' if p >= 70 else 'var(--green-600)') %}
+<div class="rx-teto">
+  <div class="rx-teto-top">
+    <span class="lbl">Uso do teto da cota{% if parcial %} <span class="muted">· disponível até agora</span>{% endif %}</span>
+    <span class="pct" style="color:{{ cor }}">{{ p }}%</span>
+  </div>
+  <div class="rx-teto-track"><div class="rx-teto-fill" style="width:{{ [p,100]|min }}%;background:{{ cor }}"></div>
+    {% if p > 100 %}<div class="rx-teto-over">passou do teto</div>{% endif %}
+  </div>
+  <div class="rx-teto-sub">Gastou <strong>{{ t.usado | brl if t.usado is defined else '' }}</strong>
+    de um teto de <strong>{{ t.limite_periodo | brl }}</strong>{% if parcial %} ({{ t.meses }} {{ 'mês' if t.meses==1 else 'meses' }}){% endif %}.
+    {% if p < 100 %}Sobra <strong>{{ t.sobra | brl }}</strong>.{% endif %}
+    No ano cheio, isso equivale a {{ t.pct_ano }}% do teto anual.</div>
+</div>
+{% endif %}
+{% endmacro %}
+
+{# Mini-tendência ano a ano (gasto ou presença). campo: 'gasto' | 'presenca'. #}
+{% macro serie_mini(serie, campo, titulo) %}
+{% if serie %}
+{% set vals = serie | map(attribute=campo) | select('!=', None) | list %}
+{% set maxv = (vals | max) if vals else 1 %}
+<div class="rx-spark">
+  <div class="rx-spark-t">{{ titulo }}</div>
+  <div class="rx-spark-bars">
+    {% for s in serie %}
+    {% set v = s[campo] %}
+    <div class="rx-spark-col">
+      <div class="rx-spark-bar" style="height:{{ ((v or 0)/maxv*64)|round|int if maxv else 0 }}px"
+           title="{{ s.ano }}: {{ (v | brl) if campo=='gasto' else ((v ~ '%') if v is not none else '—') }}"></div>
+      <div class="rx-spark-v">{% if campo=='gasto' %}{{ (v/1000000)|round(1) if v else 0 }}mi{% else %}{{ v|round|int if v is not none else '—' }}{% endif %}</div>
+      <div class="rx-spark-y">{{ s.ano | string | replace('20','') }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+{% endmacro %}
+
+{# Bloco de produção legislativa (projetos apresentados). #}
+{% macro producao(d, ano, sujeito) %}
+{% if d.producao and d.producao.total %}
+<div class="card card-pad">
+  <div class="rx-prod-head">
+    <div><div class="rx-prod-num">{{ d.producao.projetos }}</div>
+      <div class="rx-prod-l">projetos de lei apresentados em {{ ano }}</div></div>
+    <div class="rx-prod-total">{{ d.producao.total | num }}<span>peças no total<br>(inclui requerimentos, pareceres…)</span></div>
+  </div>
+  {% if d.producao.por_tipo_projeto %}
+  <div class="rx-tipos">
+    {% for t in d.producao.por_tipo_projeto %}<span class="rx-tipo"><b>{{ t.n }}</b>{{ t.tipo }}</span>{% endfor %}
+  </div>
+  {% endif %}
+  {% if d.producao.desfecho %}
+  {% set df = d.producao.desfecho %}
+  <div class="rx-desfecho">
+    <div class="df df-tram"><b>{{ df.tramitando | num }}</b><span>em tramitação</span></div>
+    <div class="df df-lei"><b>{{ df.lei | num }}</b><span>viraram lei</span></div>
+    <div class="df df-arq"><b>{{ df.arquivado | num }}</b><span>arquivados / retirados</span></div>
+  </div>
+  <p class="muted" style="font-size:11px;margin:8px 0 0">Desfecho atual dos projetos apresentados em {{ ano }}: leis e arquivamentos levam anos, então projetos recentes seguem majoritariamente em tramitação.</p>
+  {% endif %}
+  {% if d.props_recentes %}
+  <div class="prop-list">
+    {% for p in d.props_recentes %}
+    <a class="prop-item" {% if p.url_inteiro_teor %}href="{{ p.url_inteiro_teor }}" target="_blank" rel="noopener"{% endif %}>
+      <span class="prop-tag">{{ p.rotulo }}</span>
+      <span class="prop-em">{{ (p.ementa or 'Sem ementa.') | truncate(120) }}</span>
+      {% if p.url_inteiro_teor %}<i data-lucide="external-link"></i>{% endif %}
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+{% endmacro %}
+
+{# Selo de assiduidade (grau A–D). #}
+{% macro selo_badge(selo) %}
+{% if selo %}
+<div class="rx-selo grau-{{ selo.grau }}">
+  <div class="rx-selo-grau">{{ selo.grau }}</div>
+  <div class="rx-selo-info">
+    <div class="rx-selo-nota">Índice de assiduidade · {{ selo.nota }}/100</div>
+    <div class="rx-selo-comp">{% for nome, v in selo.componentes %}{{ nome }} {{ v }}%{% if not loop.last %} · {% endif %}{% endfor %}</div>
+  </div>
+</div>
+{% endif %}
+{% endmacro %}
