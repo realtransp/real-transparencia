@@ -166,7 +166,7 @@ def cmd_resumos(args: argparse.Namespace) -> None:
 
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-    p = argparse.ArgumentParser(prog="app.ingest", description="Ingestão Resumo Real")
+    p = argparse.ArgumentParser(prog="app.ingest", description="Ingestão Real Transparência")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     s = sub.add_parser("sample", help="preview rápido via API")

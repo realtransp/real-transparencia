@@ -783,7 +783,7 @@ wheels = [
 ]
 
 [[package]]
-name = "resumo-real"
+name = "real-transparencia"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

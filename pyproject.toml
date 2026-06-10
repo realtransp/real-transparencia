@@ -1,5 +1,5 @@
 [project]
-name = "resumo-real"
+name = "real-transparencia"
 version = "0.1.0"
 description = "Transparência da Câmara dos Deputados e TSE, legível para pessoas"
 readme = "README.md"

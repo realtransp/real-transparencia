@@ -12,7 +12,7 @@ import time
 import httpx
 
 _API = "https://dadosabertos.camara.leg.br/api/v2"
-_H = {"Accept": "application/json", "User-Agent": "resumo-real/0.1"}
+_H = {"Accept": "application/json", "User-Agent": "real-transparencia/0.1"}
 _TTL = 1800  # 30 min
 _cache: dict = {"t": 0.0, "data": None}
 

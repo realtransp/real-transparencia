@@ -1,4 +1,4 @@
-# Design — referência visual do Resumo Real
+# Design — referência visual do Real Transparência
 
 Esta pasta documenta a linguagem visual do app: cores, tipografia, espaçamento,
 componentes e telas de exemplo. É **referência**, não o que roda no site.

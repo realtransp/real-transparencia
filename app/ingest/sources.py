@@ -14,7 +14,7 @@ API_BASE = "https://dadosabertos.camara.leg.br/api/v2"
 ARQUIVOS = "https://dadosabertos.camara.leg.br/arquivos"
 CEAP_BASE = "https://www.camara.leg.br/cotas"
 
-_HEADERS = {"Accept": "application/json", "User-Agent": "resumo-real/0.1"}
+_HEADERS = {"Accept": "application/json", "User-Agent": "real-transparencia/0.1"}
 
 
 # --------------------------------------------------------------------------- API
@@ -76,7 +76,7 @@ def download_csv_rows(
     """
     skip = [s.upper() for s in (skip_contains or [])]
     keep = [s.upper() for s in (include_only or [])]
-    with httpx.stream("GET", url, headers={"User-Agent": "resumo-real/0.1"}, timeout=600, follow_redirects=True) as r:
+    with httpx.stream("GET", url, headers={"User-Agent": "real-transparencia/0.1"}, timeout=600, follow_redirects=True) as r:
         r.raise_for_status()
         raw = r.read()
     if url.endswith(".zip") or raw[:2] == b"PK":
