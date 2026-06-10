@@ -60,14 +60,6 @@ ingestão (rodar `daily` não pode duplicar nem apagar histórico) e um smoke da
 SQLite (pega regressões e quebras de portabilidade SQLite/Postgres). Rodam no CI a cada push
 (`.github/workflows/ci.yml`).
 
-## Deploy no Railway
-
-1. Crie um projeto, adicione o plugin **Postgres** (gera `DATABASE_URL`).
-2. Conecte o repositório, o Railway detecta via Nixpacks e usa o `Procfile`/`railway.json`.
-3. Defina variáveis: `DATABASE_URL` (auto), `GEMINI_API_KEY` ou `XAI_API_KEY`.
-4. Backfill: `railway run uv run python -m app.ingest backfill`.
-5. Agende um **Cron** diário: `uv run python -m app.ingest daily`.
-
 ## Pra onde vamos
 
 O plano inclui **cobrança pelas redes sociais** (post pré-pronto mencionando o deputado,
