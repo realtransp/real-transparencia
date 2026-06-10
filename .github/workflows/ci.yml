@@ -1,22 +1,23 @@
 name: CI
 
-# Restrito de propósito (evitar gastar minutos):
-# - Não roda em push. Só manualmente (workflow_dispatch) ou em pull_request.
-# - O job usa o environment "ci", que deve ter VOCÊ como required reviewer
-#   (Settings > Environments > ci > Required reviewers). Assim o run fica
-#   "Waiting" e SÓ consome runner depois que você aprovar.
-# - Ignora mudanças só de documentação, cancela runs duplicados e tem timeout.
+# Roda os testes automaticamente em PRs e pushes na main.
+# Mudanças só de documentação não disparam o CI.
 on:
-  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**/*.md"
+      - "LICENSE"
+      - "docs/**"
+      - "design_system/**"
   pull_request:
-    branches: [main, master]
     paths-ignore:
       - "**/*.md"
       - "LICENSE"
       - "docs/**"
       - "design_system/**"
 
-# Um run novo no mesmo branch cancela o anterior (não acumula minutos).
+# Um run novo no mesmo branch cancela o anterior.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -27,8 +28,7 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    environment: ci          # trava: exige aprovação manual (required reviewer)
-    timeout-minutes: 10      # teto de segurança de minutos
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 

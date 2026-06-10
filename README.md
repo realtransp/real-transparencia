@@ -68,24 +68,17 @@ SQLite (pega regressões e quebras de portabilidade SQLite/Postgres). Rodam no C
 4. Backfill: `railway run uv run python -m app.ingest backfill`.
 5. Agende um **Cron** diário: `uv run python -m app.ingest daily`.
 
-## CI/CD (travados, só com sua aprovação)
+## Contribuindo
 
-Os workflows são propositalmente restritos para não gastar minutos nem fazer deploy sozinhos:
+Pull requests são bem-vindos! O fluxo é simples:
 
-- **CI** (`.github/workflows/ci.yml`): não roda em push. Só manualmente (botão *Run workflow*)
-  ou em pull request, e mesmo aí o job fica *Waiting* até você aprovar. Ignora mudanças só de
-  documentação, cancela runs duplicados e tem timeout.
-- **CD** (`.github/workflows/cd.yml`): deploy no Railway **só manual**. Exige clicar *Run
-  workflow*, digitar `deploy` para confirmar, e aprovar o ambiente. Roda os testes antes de subir.
+1. Faça o fork, crie um branch e abra o PR.
+2. O **CI roda os testes automaticamente** no PR (`uv run pytest` — rode local antes para ganhar tempo).
+3. Mudanças só de documentação não disparam o CI.
 
-Configuração única no GitHub (sem isso as travas de aprovação não valem):
-
-1. **Settings → Environments**: crie `ci` e `production` e adicione você em *Required reviewers*.
-2. **Settings → Secrets and variables → Actions**: adicione `RAILWAY_TOKEN` (token de projeto do Railway).
-3. Opcional: em **Settings → Actions → General**, restrinja quem pode rodar workflows.
-
-> Ambientes com *required reviewers* em repositório **privado** exigem plano pago; em repositório
-> **público** (open source) é gratuito.
+O **deploy em produção** (`.github/workflows/cd.yml`) é manual, feito pelo mantenedor após o
+merge: roda os testes e sobe os dois serviços (web + cron de ingestão) no Railway. Todo deploy
+fica disponível em [real-transparencia-production.up.railway.app](https://real-transparencia-production.up.railway.app).
 
 ## Estrutura
 

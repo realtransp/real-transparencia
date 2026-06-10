@@ -1,14 +1,8 @@
 name: CD (deploy Railway)
 
-# Deploy MANUAL e travado (nunca sobe sozinho, evita gasto/deploy acidental):
-# - Só roda via "Run workflow" (workflow_dispatch). Nunca em push/PR.
-# - Exige digitar "deploy" no campo de confirmação.
-# - Usa o environment "production", que deve ter VOCÊ como required reviewer
-#   (Settings > Environments > production). O job fica "Waiting" até você aprovar.
-# - Roda os testes antes de subir; se falharem, não faz deploy.
-#
-# Segredo necessário: RAILWAY_TOKEN (Settings > Secrets and variables > Actions).
-#   É o token de projeto do Railway (o mesmo usado no `railway up` local).
+# Deploy manual: disparado pelo mantenedor via "Run workflow".
+# Roda os testes antes de subir; se falharem, não faz deploy.
+# Segredo necessário: RAILWAY_TOKEN (token de projeto do Railway).
 on:
   workflow_dispatch:
     inputs:
@@ -27,9 +21,9 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: production        # trava: exige aprovação manual (required reviewer)
+    environment: production
     timeout-minutes: 20
-    # Trava extra: só segue se você digitou exatamente "deploy".
+    # Confirmação contra disparo acidental.
     if: ${{ github.event.inputs.confirmar == 'deploy' }}
     steps:
       - uses: actions/checkout@v4
