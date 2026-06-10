@@ -2386,3 +2386,102 @@ def deputado_serie_anual(dep_id: int) -> list[dict]:
             votos.c.deputado_id == dep_id, ycond))
         out.append(dict(ano=a, gasto=gasto, participou=part, sim=sim, nao=nao))
     return out
+
+
+# ===================================================================
+#  Frequência oficial em plenário, com motivo de falta (presenca_dia)
+# ===================================================================
+def faltas_deputado(dep_id: int, ano: int | None = None) -> dict | None:
+    """Dias de sessão do deputado: presenças, faltas justificadas (com % de cada
+    motivo declarado) e faltas sem justificativa. Fonte: registro oficial diário."""
+    from .db import presenca_dia as pd
+
+    cond = [pd.c.deputado_id == dep_id]
+    if ano:
+        cond.append(pd.c.ano == ano)
+    rows = _rows(select(pd.c.frequencia, pd.c.justificativa).where(*cond))
+    if not rows:
+        return None
+    total = len(rows)
+    pres = sum(1 for r in rows if r["frequencia"] == "presenca")
+    just = sum(1 for r in rows if r["frequencia"] == "ausencia_justificada")
+    nao_just = total - pres - just
+    motivos: dict[str, int] = {}
+    for r in rows:
+        if r["frequencia"] == "ausencia_justificada":
+            m = r["justificativa"] or "Justificativa não detalhada"
+            motivos[m] = motivos.get(m, 0) + 1
+    if nao_just:
+        motivos["Sem justificativa registrada"] = nao_just
+    aus_total = just + nao_just
+    lista = sorted(motivos.items(), key=lambda kv: -kv[1])
+    return dict(
+        ano=ano, dias=total, presencas=pres,
+        justificadas=just, nao_justificadas=nao_just,
+        pct_presenca=round(100 * pres / total, 1),
+        motivos=[dict(motivo=m, dias=q, pct=round(100 * q / aus_total, 1)) for m, q in lista] if aus_total else [],
+    )
+
+
+def rank_faltas_sem_justificativa(ano: int, limit: int = 15) -> list[dict]:
+    """Deputados com mais faltas SEM justificativa registrada no ano (registro oficial),
+    com o total de dias, as justificadas e o motivo mais comum das justificadas."""
+    from .db import presenca_dia as pd
+
+    nj = func.sum(case((pd.c.frequencia == "ausencia", 1), else_=0)).label("nao_just")
+    jt = func.sum(case((pd.c.frequencia == "ausencia_justificada", 1), else_=0)).label("just")
+    tot = func.count().label("dias")
+    q = (
+        select(pd.c.deputado_id, nj, jt, tot,
+               deputados.c.nome_eleitoral, deputados.c.sigla_partido, deputados.c.sigla_uf, deputados.c.url_foto)
+        .join(deputados, deputados.c.id == pd.c.deputado_id)
+        .where(pd.c.ano == ano)
+        .group_by(pd.c.deputado_id, deputados.c.nome_eleitoral, deputados.c.sigla_partido,
+                  deputados.c.sigla_uf, deputados.c.url_foto)
+        .having(nj > 0)
+        .order_by(desc("nao_just"), desc("just"))
+        .limit(limit)
+    )
+    out = []
+    for r in _rows(q):
+        # motivo mais comum das justificadas desse deputado (contexto, não acusação)
+        top = _rows(
+            select(pd.c.justificativa, func.count().label("q"))
+            .where(pd.c.deputado_id == r["deputado_id"], pd.c.ano == ano,
+                   pd.c.frequencia == "ausencia_justificada", pd.c.justificativa.isnot(None))
+            .group_by(pd.c.justificativa).order_by(desc("q")).limit(1)
+        )
+        out.append(dict(
+            deputado_id=r["deputado_id"], nome=r["nome_eleitoral"],
+            partido=r["sigla_partido"], uf=r["sigla_uf"], foto=r["url_foto"],
+            dias=r["dias"], nao_justificadas=r["nao_just"], justificadas=r["just"],
+            pct_falta_nj=round(100 * r["nao_just"] / r["dias"], 1) if r["dias"] else 0,
+            motivo_top=top[0]["justificativa"] if top else None,
+        ))
+    return out
+
+
+def motivos_faltas_globais(ano: int) -> dict | None:
+    """Panorama da Câmara no ano: % de presença e a distribuição dos motivos de
+    todas as ausências (incluindo as sem justificativa registrada)."""
+    from .db import presenca_dia as pd
+
+    total = _scalar(select(func.count()).where(pd.c.ano == ano))
+    if not total:
+        return None
+    pres = _scalar(select(func.count()).where(pd.c.ano == ano, pd.c.frequencia == "presenca"))
+    nao_just = _scalar(select(func.count()).where(pd.c.ano == ano, pd.c.frequencia == "ausencia"))
+    rows = _rows(
+        select(pd.c.justificativa, func.count().label("q"))
+        .where(pd.c.ano == ano, pd.c.frequencia == "ausencia_justificada")
+        .group_by(pd.c.justificativa).order_by(desc("q"))
+    )
+    motivos = [dict(motivo=r["justificativa"] or "Justificativa não detalhada", dias=r["q"]) for r in rows]
+    if nao_just:
+        motivos.append(dict(motivo="Sem justificativa registrada", dias=nao_just))
+    motivos.sort(key=lambda m: -m["dias"])
+    aus_total = total - pres
+    for m in motivos:
+        m["pct"] = round(100 * m["dias"] / aus_total, 1) if aus_total else 0
+    return dict(ano=ano, registros=total, pct_presenca=round(100 * pres / total, 1),
+                ausencias=aus_total, motivos=motivos)

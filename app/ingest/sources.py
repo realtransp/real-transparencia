@@ -50,6 +50,21 @@ def api_paginate(path: str, params: dict | None = None, max_pages: int | None = 
         params["pagina"] += 1
 
 
+def http_get_text(url: str, params: dict | None = None, retries: int = 3, timeout: int = 40) -> str:
+    """GET simples com retry, devolvendo o corpo como texto (ex.: web services XML)."""
+    last_exc: Exception | None = None
+    for attempt in range(retries):
+        try:
+            r = httpx.get(url, params=params, headers={"User-Agent": _HEADERS["User-Agent"]},
+                          timeout=timeout, follow_redirects=True)
+            r.raise_for_status()
+            return r.text
+        except Exception as exc:  # noqa: BLE001 - retry simples
+            last_exc = exc
+            time.sleep(1.5 * (attempt + 1))
+    raise RuntimeError(f"Falha ao buscar {url}: {last_exc}")
+
+
 # --------------------------------------------------------------------- arquivos
 def _decode(raw: bytes) -> str:
     for enc in ("utf-8-sig", "utf-8", "latin-1"):

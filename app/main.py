@@ -150,7 +150,7 @@ def deputado(request: Request, dep_id: int):
     return render(request, "deputado.html", active="deputy",
                   dep=dep, stats=Q.deputado_stats(dep_id, ano), presenca=presenca,
                   financeiro=fin, cota=cota, salario=salario, trabalho=trabalho,
-                  serie=Q.deputado_serie_anual(dep_id),
+                  serie=Q.deputado_serie_anual(dep_id), faltas=Q.faltas_deputado(dep_id, ano),
                   votos=Q.deputado_votos_agrupado(dep_id), eleicao=Q.deputado_eleicao(dep_id))
 
 
@@ -244,8 +244,11 @@ def relatorio(request: Request, escopo: str = "geral", alvo: str | None = None, 
     if escopo == "deputado" and not (alvo or "").isdigit():
         escopo, alvo = "geral", None
     d = Q.raiox_data(escopo, alvo, ano)
+    faltas_rank = Q.rank_faltas_sem_justificativa(ano) if escopo == "geral" else []
+    faltas_global = Q.motivos_faltas_globais(ano) if escopo == "geral" else None
     return render(request, "relatorio.html", active="raiox", anos=anos, ano=ano,
                   escopo=escopo, alvo=alvo, d=d,
+                  faltas_rank=faltas_rank, faltas_global=faltas_global,
                   partidos_gasto=Q.gasto_por_partido(ano), ranking=Q.ranking_gastos_deputados(15, ano=ano),
                   lista_partidos=Q.partidos_list(), lista_deputados=Q.deputados_min())
 

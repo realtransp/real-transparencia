@@ -73,6 +73,11 @@ def cmd_backfill(args: argparse.Namespace) -> None:
                 print(f"  proposições: {np_} props, {na_} vínculos autor")
             except Exception as exc:  # noqa: BLE001
                 print(f"  proposições: pulado ({exc})")
+            # frequência oficial em plenário, com motivo de ausência (1 chamada/dia)
+            try:
+                print(f"  presença plenário (motivos): {camara.load_presenca_plenario_ano(ano)} registros")
+            except Exception as exc:  # noqa: BLE001
+                print(f"  presença plenário: pulado ({exc})")
 
     print("→ enriquecendo votações com o assunto (ementa) via API...")
     try:
@@ -129,6 +134,9 @@ def cmd_daily(args: argparse.Namespace) -> None:
     falhas += _step("votações", lambda: camara.load_votacoes_recentes(limite_paginas=2))
     falhas += _step("proposições", lambda: camara.load_proposicoes_bulk(ano))
     falhas += _step("ementas", lambda: camara.enrich_votacoes(limite=60))
+    hoje = _dt.date.today()
+    falhas += _step("presença plenário (motivos)",
+                    lambda: camara.load_presenca_plenario(hoje - _dt.timedelta(days=10), hoje))
     if falhas:
         log.error("diário concluído com %d passo(s) com falha", falhas)
         raise SystemExit(1)

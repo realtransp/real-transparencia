@@ -67,6 +67,33 @@
   </div>
   <p class="muted" style="font-size:11.5px;margin-bottom:22px">Salário = subsídio fixo do deputado, igual para todos; é diferente da cota (CEAP) e da verba de gabinete. O total no mandato é estimativa pelo valor atual × meses da 57ª legislatura.</p>
 
+  {% if faltas %}
+  <h2 class="h2" style="margin:8px 0 12px">Faltas em plenário · {{ faltas.ano }}</h2>
+  <p class="muted" style="font-size:13px;margin-bottom:10px">Registro oficial diário da Câmara: cada dia de sessão conta como presença, ausência justificada (com o motivo declarado) ou ausência sem justificativa registrada.</p>
+  <div class="stat-grid" style="margin-bottom:14px">
+    {{ stat_card('Dias de sessão', faltas.dias | num, 'em ' ~ faltas.ano) }}
+    {{ stat_card('Presente', faltas.presencas | num, faltas.pct_presenca ~ '% dos dias', 'var(--green-700)') }}
+    {{ stat_card('Faltas justificadas', faltas.justificadas | num, 'motivo oficial declarado') }}
+    {{ stat_card('Sem justificativa', faltas.nao_justificadas | num, 'nenhum motivo registrado',
+        'var(--clay-600)' if faltas.nao_justificadas else 'var(--green-700)') }}
+  </div>
+  {% if faltas.motivos %}
+  <div class="card card-pad" style="margin-bottom:26px">
+    <h3 class="h3" style="margin-bottom:10px">Motivos das faltas</h3>
+    {% for m in faltas.motivos %}
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <span style="flex:0 0 240px;font-size:13px;{{ 'color:var(--clay-700);font-weight:600' if m.motivo == 'Sem justificativa registrada' else '' }}">{{ m.motivo }}</span>
+      <div style="flex:1;height:10px;background:var(--paper-2);border-radius:5px;overflow:hidden">
+        <div style="width:{{ m.pct }}%;height:100%;border-radius:5px;background:{{ 'var(--clay-600)' if m.motivo == 'Sem justificativa registrada' else 'var(--green-600)' }}"></div>
+      </div>
+      <span class="data" style="flex:0 0 110px;text-align:right;font-size:12.5px">{{ m.dias }} dia{{ 's' if m.dias != 1 }} · {{ m.pct }}%</span>
+    </div>
+    {% endfor %}
+    <p class="muted" style="font-size:11.5px;margin-top:10px">Percentual sobre o total de ausências do ano. A justificativa é a registrada oficialmente pela Câmara; o site não julga o motivo.</p>
+  </div>
+  {% endif %}
+  {% endif %}
+
   <h2 class="h2" style="margin:8px 0 12px">Ao longo do mandato (por ano)</h2>
   <p class="muted" style="font-size:13px;margin-bottom:10px">Como a atuação e o gasto variaram desde 2022, útil pra ver tendência.</p>
   <div class="card" style="overflow:hidden;margin-bottom:26px">

@@ -14,6 +14,7 @@ from ..db import (
     merge_by_pk,
     orientacoes,
     presenca,
+    presenca_dia,
     proposicao_autores,
     proposicoes,
     replace_table,
@@ -425,6 +426,107 @@ def _presenca_rows(ano: int):
 def load_presenca_bulk(ano: int) -> int:
     """Presença em eventos/sessões do ano (atômico: delete+insert numa transação)."""
     return replace_where_atomic(presenca, {"ano": ano}, _presenca_rows(ano), chunk=5000)
+
+
+# ----------------------------------------- PRESENÇA OFICIAL EM PLENÁRIO (com motivo)
+# Fonte: web service XML da Câmara (SitCamaraWS). É o registro oficial diário,
+# o mesmo do relatório "presença em plenário" do portal: Presença, Ausência
+# justificada (com o motivo declarado) ou Ausência (sem justificativa).
+PRESENCA_WS = "https://www.camara.leg.br/SitCamaraWS/SessoesReunioes.asmx/ListarPresencasDia"
+
+_FREQ_MAP = {
+    "presença": "presenca",
+    "ausência justificada": "ausencia_justificada",
+    "ausência": "ausencia",
+}
+
+
+def _norm_nome(s: str | None) -> str:
+    """Normaliza nome p/ casar o web service (sem id) com deputados.id: sem acento, minúsculo."""
+    import unicodedata
+
+    s = unicodedata.normalize("NFKD", (s or "")).encode("ascii", "ignore").decode()
+    return " ".join(s.lower().split())
+
+
+def _mapa_deputados() -> dict[tuple[str, str], int | None]:
+    """(nome normalizado, UF) -> id. Nome eleitoral e nome civil; ambíguo vira None."""
+    from sqlalchemy import select
+    from ..db import engine
+
+    mapa: dict[tuple[str, str], int | None] = {}
+    with engine.connect() as conn:
+        rows = conn.execute(select(deputados.c.id, deputados.c.nome,
+                                   deputados.c.nome_eleitoral, deputados.c.sigla_uf))
+        for did, nome, nome_el, uf in rows:
+            for n in {_norm_nome(nome), _norm_nome(nome_el)}:
+                if not n:
+                    continue
+                key = (n, (uf or "").upper())
+                mapa[key] = None if (key in mapa and mapa[key] != did) else did
+    return mapa
+
+
+def _presencas_dia(d, mapa) -> list[dict]:
+    """Busca e interpreta o XML de um dia. Lista vazia se não houve sessão."""
+    import xml.etree.ElementTree as ET
+
+    data_br = d.strftime("%d/%m/%Y")
+    resp = S.http_get_text(PRESENCA_WS, params={
+        "data": data_br, "numLegislatura": "", "numMatriculaParlamentar": "",
+        "siglaPartido": "", "siglaUF": "",
+    })
+    root = ET.fromstring(resp)
+    rows = []
+    for p in root.iter("parlamentar"):
+        nome_raw = (p.findtext("nomeParlamentar") or "").rsplit("-", 1)[0]
+        uf = (p.findtext("siglaUF") or "").strip().upper()
+        freq = _FREQ_MAP.get((p.findtext("descricaoFrequenciaDia") or "").strip().lower())
+        if not freq:
+            continue
+        dep_id = mapa.get((_norm_nome(nome_raw), uf))
+        if dep_id is None:
+            continue  # não casou (homônimo ou fora do roster): ignora e segue
+        just = " ".join((p.findtext("justificativa") or "").split()) or None
+        rows.append(dict(deputado_id=dep_id, data=d, ano=d.year,
+                         frequencia=freq, justificativa=just))
+    return rows
+
+
+def load_presenca_plenario(de, ate) -> int:
+    """Frequência oficial em plenário no intervalo [de, ate], com motivo de ausência.
+
+    Uma chamada por dia (dias sem sessão respondem vazio e são pulados).
+    Idempotente e atômico por dia: regravar um dia não duplica nem deixa vazio.
+    """
+    import datetime as dt
+    import time
+
+    mapa = _mapa_deputados()
+    total = 0
+    d = de
+    while d <= ate:
+        try:
+            rows = _presencas_dia(d, mapa)
+        except Exception:
+            rows = []  # dia com erro de rede/parse: mantém o que já existe
+        if rows:
+            total += replace_where_atomic(presenca_dia, {"data": d}, rows)
+        d += dt.timedelta(days=1)
+        time.sleep(0.2)  # educado com o serviço
+    return total
+
+
+def load_presenca_plenario_ano(ano: int) -> int:
+    """Frequência oficial em plenário do ano inteiro (até hoje, se ano corrente)."""
+    import datetime as dt
+
+    hoje = dt.date.today()
+    de = dt.date(ano, 1, 1)
+    ate = min(dt.date(ano, 12, 31), hoje)
+    if de > ate:
+        return 0
+    return load_presenca_plenario(de, ate)
 
 
 # ------------------------------------------------------------------ helpers

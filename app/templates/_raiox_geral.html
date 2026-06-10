@@ -124,6 +124,37 @@
   </div>
 </div>
 
+{% if faltas_rank %}
+<div class="wrap wrap-wide">
+  <div class="card card-pad">
+    <h3 class="h3" style="margin-bottom:4px">Faltas em plenário: quem mais falta sem justificar <span class="muted" style="font-size:12px;font-weight:400">· {{ ano }}</span></h3>
+    <p class="muted" style="font-size:12px;margin-bottom:10px">Registro oficial diário da Câmara. "Sem justificativa" significa que nenhum motivo foi registrado para o dia de sessão; as justificadas têm o motivo oficial declarado ao lado.</p>
+    {% if faltas_global %}
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+      {% for m in faltas_global.motivos[:6] %}
+      <span class="tag" {% if m.motivo == 'Sem justificativa registrada' %}style="background:var(--clay-100);color:var(--clay-700)"{% endif %}>{{ m.motivo }} · {{ m.pct }}%</span>
+      {% endfor %}
+      <span class="muted" style="font-size:11.5px;align-self:center">(% de todas as ausências da Câmara em {{ ano }})</span>
+    </div>
+    {% endif %}
+    <div class="table-scroll">
+    <table class="rank-table">
+      <thead><tr><th class="rk">#</th><th>Deputado</th><th class="num">Sem justificativa</th><th class="num">Justificadas</th><th class="num">Dias de sessão</th><th>Motivo mais comum (justificadas)</th></tr></thead>
+      <tbody>{% for r in faltas_rank %}<tr>
+        <td class="rk">{{ loop.index }}</td>
+        <td><a href="/deputados/{{ r.deputado_id }}">{{ r.nome }}</a> <span class="muted" style="font-size:11px">{{ r.partido }}-{{ r.uf }}</span></td>
+        <td class="num" style="color:var(--clay-700);font-weight:600">{{ r.nao_justificadas }}</td>
+        <td class="num">{{ r.justificadas }}</td>
+        <td class="num">{{ r.dias }}</td>
+        <td class="muted" style="font-size:12px">{{ r.motivo_top or '—' }}</td>
+      </tr>{% endfor %}</tbody>
+    </table>
+    </div>
+    <p class="muted" style="font-size:11.5px;margin-top:8px">Fonte: relatório oficial de presença em plenário da Câmara. O site mostra o registro como está; não avalia os motivos.</p>
+  </div>
+</div>
+{% endif %}
+
 <div class="wrap wrap-wide">
   <h2 class="h2" style="margin:8px 0 12px">Últimas votações</h2>
   <div class="feed-list">

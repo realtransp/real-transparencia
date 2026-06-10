@@ -109,6 +109,19 @@ presenca = Table(
     Column("presente", Boolean),
 )
 
+# Frequência OFICIAL em plenário, por dia, com justificativa de ausência.
+# Fonte: web service SitCamaraWS ListarPresencasDia (XML oficial da Câmara).
+# frequencia: 'presenca' | 'ausencia_justificada' | 'ausencia' (sem justificativa)
+presenca_dia = Table(
+    "presenca_dia", metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("deputado_id", Integer, index=True),
+    Column("data", Date, index=True),
+    Column("ano", Integer, index=True),
+    Column("frequencia", String(30), index=True),
+    Column("justificativa", String(255)),  # motivo oficial declarado; NULL se não houver
+)
+
 # Proposições (projetos apresentados pelos deputados): produção legislativa.
 proposicoes = Table(
     "proposicoes", metadata,
