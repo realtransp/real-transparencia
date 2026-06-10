@@ -4,7 +4,7 @@ Transparência da Câmara dos Deputados (e TSE) **legível para qualquer pessoa*
 gastando, com o quê e com quem; quem votou o quê; presença, salário e dados de eleições,
 com resumos em linguagem simples gerados por IA.
 
-**🌐 No ar: [real-transparencia-production.up.railway.app](https://real-transparencia-production.up.railway.app)** — todo deploy em produção fica disponível nesse endereço.
+**🌐 No ar: [real-transparencia-production.up.railway.app](https://real-transparencia-production.up.railway.app)**. Todo deploy em produção fica disponível nesse endereço.
 
 [![Raio-X da Câmara](docs/screenshot-relatorio.png)](https://real-transparencia-production.up.railway.app/relatorio)
 
@@ -77,23 +77,21 @@ TSE e pelas finanças das prefeituras. Detalhes e progresso no [ROADMAP](ROADMAP
 
 ## Contribuindo
 
-Pull requests são bem-vindos! O fluxo é simples:
+Quer ajudar? O trabalho está organizado nas **[Issues](../../issues)**: escolha uma (as
+`good first issue` são as portas de entrada), **comente que vai pegar** pra todo mundo saber
+quem está em quê, e abra o PR. O CI roda os testes automaticamente. O passo a passo completo
+e os padrões do projeto estão no **[CONTRIBUTING.md](CONTRIBUTING.md)**.
 
-1. Faça o fork, crie um branch e abra o PR.
-2. O **CI roda os testes automaticamente** no PR (`uv run pytest` — rode local antes para ganhar tempo).
-3. Mudanças só de documentação não disparam o CI.
-
-O **deploy em produção** (`.github/workflows/cd.yml`) é manual, feito pelo mantenedor após o
-merge: roda os testes e sobe os dois serviços (web + cron de ingestão) no Railway. Todo deploy
-fica disponível em [real-transparencia-production.up.railway.app](https://real-transparencia-production.up.railway.app).
+O **deploy em produção** é manual, feito pelo mantenedor após o merge: roda os testes e sobe
+os dois serviços (web + cron de ingestão) no Railway.
 
 ## Estrutura
 
-- `app/ingest/` — coleta (API + arquivos em massa) e CLI `sample | backfill | daily`.
-- `app/queries.py` — consultas de leitura (rankings, placares, presença, eleições).
-- `app/analysis/` — cliente de IA (Gemini/Grok) + resumos cacheados.
-- `app/main.py` + `app/templates/` — site FastAPI + Jinja2.
-- `tests/` — pytest (parsers, ingestão, queries).
+- `app/ingest/`: coleta (API + arquivos em massa) e CLI `sample | backfill | daily`.
+- `app/queries.py`: consultas de leitura (rankings, placares, presença, eleições).
+- `app/analysis/`: cliente de IA (Gemini/Grok) + resumos cacheados.
+- `app/main.py` + `app/templates/`: site FastAPI + Jinja2.
+- `tests/`: pytest (parsers, ingestão, queries).
 
 ## Aviso
 

@@ -31,18 +31,18 @@ deputado sente: em público.
 
 Trazer o poder municipal para o site, começando pelo que tem dado uniforme nacional.
 
-**Fase 1 — quem manda na sua cidade (TSE, uniforme para os 5.570 municípios):**
+**Fase 1: quem manda na sua cidade (TSE, uniforme para os 5.570 municípios):**
 - [ ] Ingestão TSE das eleições municipais (2024 e anteriores): prefeitos e vereadores
       eleitos, votos recebidos, financiamento de campanha e doadores
 - [ ] Páginas `/municipios` (busca por cidade) e `/municipio/{uf}/{cidade}`: prefeito,
       vice e bancada de vereadores, com o lado eleitoral de cada um
 - [ ] Busca por cidade na home
 
-**Fase 2 — dinheiro da prefeitura (SICONFI/Tesouro Nacional):**
+**Fase 2: dinheiro da prefeitura (SICONFI/Tesouro Nacional):**
 - [ ] Receita e despesa anual de cada prefeitura (RREO/RGF), em linguagem simples
 - [ ] Comparação com cidades vizinhas/do mesmo porte
 
-**Fase 3 — atuação das câmaras municipais (heterogêneo, esforço contínuo):**
+**Fase 3: atuação das câmaras municipais (heterogêneo, esforço contínuo):**
 - [ ] Votações e pautas das câmaras que usam SAPL (Interlegis), onde a API existir
 - [ ] Despesas detalhadas via portais/TCEs estaduais, estado a estado
 
