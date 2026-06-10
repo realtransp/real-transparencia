@@ -45,7 +45,12 @@ jobs:
       - name: Instala a Railway CLI
         run: npm i -g @railway/cli
 
-      - name: Deploy
+      - name: Deploy (web)
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: railway up --detach --service real-transparencia
+
+      - name: Deploy (cron de ingestão)
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: railway up --detach --service ingest-cron
