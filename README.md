@@ -68,6 +68,13 @@ SQLite (pega regressões e quebras de portabilidade SQLite/Postgres). Rodam no C
 4. Backfill: `railway run uv run python -m app.ingest backfill`.
 5. Agende um **Cron** diário: `uv run python -m app.ingest daily`.
 
+## Pra onde vamos
+
+O plano inclui **cobrança pelas redes sociais** (post pré-pronto mencionando o deputado,
+compartilhar no WhatsApp, card com os números do mandato) e **expandir para o poder
+municipal**: prefeitos e vereadores das 5.570 cidades, começando pelos dados eleitorais do
+TSE e pelas finanças das prefeituras. Detalhes e progresso no [ROADMAP](ROADMAP.md).
+
 ## Contribuindo
 
 Pull requests são bem-vindos! O fluxo é simples:
